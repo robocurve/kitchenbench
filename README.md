@@ -42,35 +42,117 @@ designed to point straight at real hardware — e.g. **YAM bimanual arms** drive
 ## Task instances & realizations
 
 KitchenBench follows the
-[physical-automation methodology](https://github.com/jeqcho/physical-automation-methodology-docs):
-each task is a set of **task instances**, and each instance is a *stochastic
-environment specification* — named random variables with **distributions** — plus
-a goal. Defaults match the methodology's recommendations:
+[physical-automation methodology](https://github.com/jeqcho/physical-automation-methodology-docs).
+The key ideas, top-down:
 
-- **5 instances per task** (`K_INSTANCES`) → one RoboLens `Scene` each.
-- **5 realizations per instance** (`K_REALIZATIONS`) → run via
-  `Epochs(count=5, reducer="mean")`. Each realization samples the instance's
-  random variables (seeded per epoch) into one concrete environment.
+- A **task** (e.g. `pour_pasta`) is a set of **task instances**.
+- A **task instance** is one concrete *scenario written as a distribution*: a
+  **stochastic setup** (named random variables, each with a distribution) plus a
+  **goal** (a natural-language success criterion that may reference the sampled
+  variables). It is *not* a single fixed scene — it is a recipe for generating many.
+- A **realization** is one sample of that recipe: draw every random variable from
+  its distribution to get one concrete environment (and a concrete goal sentence).
+- Running a `(policy, embodiment)` pair on `K_realizations` realizations and
+  averaging the binary successes estimates the **instance success probability**
+  P̂[Yᵢ = 1].
 
-```python
-from kitchenbench import SPEC_BY_KEY, realize_scene
-inst = SPEC_BY_KEY["pour_pasta"].instances[0]
-inst.setup_spec()          # {'fill_g': 'Uniform[80, 200]', 'vessel': 'Categorical({bowl, cup, pot})', ...}
-inst.realize(seed=0).instruction   # a concrete goal, e.g. "pour the dry pasta into the cup"
+```
+task  pour_pasta
+ ├─ instance 1  (a distribution)  ──realize──▶  5 concrete environments  ──▶  P̂₁
+ ├─ instance 2  (a distribution)  ──realize──▶  5 concrete environments  ──▶  P̂₂
+ │  … 5 instances total …
+ └─ instance 5  (a distribution)  ──realize──▶  5 concrete environments  ──▶  P̂₅
 ```
 
-The mean reducer over 5 realizations makes the **per-scene reduced `task_success`
-the instance success probability P̂[Yᵢ=1]** — exactly the methodology's estimator.
-On real hardware, an embodiment/operator calls `realize_scene(scene, seed)` to get
-the concrete setup to arrange (`Realization.setup_lines`).
+KitchenBench uses the methodology's recommended defaults: **5 instances per task**
+(`K_INSTANCES`) and **5 realizations per instance** (`K_REALIZATIONS`).
 
-Distribution types: `Uniform[a,b]`, `Categorical({…})`, `N(μ,σ²)`, `Constant`.
+### A worked example
 
-> **Validation status.** The shipped instances are AI-authored drafts
-> (`Validation(source="opus-draft")`, `validated=False`). The methodology's
-> `K_i = 5` is *after* human validation (3 experts, representativeness & quality
-> ≥ 4); run that commissioning pipeline before trusting the instances. We do **not**
-> fabricate ratings.
+This is one of `pour_pasta`'s five instances (from
+[`specs.py`](src/kitchenbench/specs.py), lightly reformatted):
+
+```python
+TaskInstance(
+    instance_id="pour_pasta/measuring-cup-to-bowl",
+    goal="pour the dry pasta into the {vessel}",       # {vessel} is sampled
+    setup={
+        "vessel":         Categorical(("bowl", "cup", "pot")),
+        "fill_g":         Uniform(80, 200),            # grams of pasta
+        "pour_height_cm": Uniform(8, 15),
+        "vessel_x_cm":    Normal(0.0, 3.0),            # placement jitter (cm)
+        "vessel_y_cm":    Normal(0.0, 3.0),
+    },
+    language_vars=("vessel",),
+    target_kind="pour_into",
+    static={"substance": "dry_pasta"},
+)
+```
+
+**Realizing it** with different seeds samples those distributions into concrete
+environments an operator can physically arrange (and a goal to give the VLA)
+(numbers rounded here for readability):
+
+```
+realize(seed=0)                          realize(seed=2)
+  Goal: pour the dry pasta into the bowl   Goal: pour the dry pasta into the cup
+  Setup:                                    Setup:
+    vessel        = bowl                      vessel        = cup
+    fill_g        = 156                        fill_g        = 111
+    pour_height_cm = 9.9                       pour_height_cm = 10.1
+    vessel_x_cm   = +0.3                        vessel_x_cm   = -7.3
+    vessel_y_cm   = -1.6                        vessel_y_cm   = +5.4
+```
+
+Inspect and realize instances from Python:
+
+```python
+from kitchenbench import SPEC_BY_KEY
+
+inst = SPEC_BY_KEY["pour_pasta"].instances[0]
+inst.setup_spec()
+# {'fill_g': 'Uniform[80, 200]', 'pour_height_cm': 'Uniform[8, 15]',
+#  'vessel': 'Categorical({bowl, cup, pot})', 'vessel_x_cm': 'N(0, 3²)', ...}
+
+r = inst.realize(seed=0)
+r.instruction     # 'pour the dry pasta into the bowl'
+r.values          # {'vessel': 'bowl', 'fill_g': 156.43…, 'pour_height_cm': 9.88…, …}  (JSON-native)
+r.setup_lines     # ('fill_g = 156.43…', 'pour_height_cm = 9.88…', 'vessel = bowl', …)
+```
+
+### How it maps to a run
+
+Each instance becomes one RoboLens `Scene`; the 5 realizations are the 5 **epochs**
+(`Epochs(count=5, reducer="mean")`), each seeded independently. Because the reducer
+is the mean, **each scene's reduced `task_success` is the instance success
+probability P̂[Yᵢ = 1]** — exactly the methodology's estimator:
+
+```python
+from robolens import eval
+(log,) = eval("kitchenbench/pour_pasta", "kitchen_scripted", "kitchen")
+for s in log.samples:
+    print(s.scene_id, s.reduced["task_success"])   # one P̂ per instance
+```
+
+On real hardware an embodiment (or operator tool) calls `realize_scene(scene,
+seed)` to get the concrete setup to arrange — `Realization.setup_lines` is the
+"arrange this" checklist, and `Realization.instruction` is the goal fed to the VLA.
+
+**Distribution types** (in [`distributions.py`](src/kitchenbench/distributions.py)):
+`Uniform(a, b)` continuous · `Categorical((…), weights=None)` over a finite set ·
+`Normal(μ, σ)` Gaussian · `Constant(v)` fixed. Every sample is a builtin
+`float`/`int`/`str` (JSON-native), and `Categorical` preserves value types (an `int`
+category samples back as an `int`).
+
+> **Validation status — read before trusting the numbers.** The shipped instances
+> are **AI-authored drafts** (`Validation(source="opus-draft")`, `validated=False`).
+> The methodology's `K_i = 5` is the count *after* human validation — 3 experts
+> rating each instance on representativeness **and** quality, accepted only if both
+> are ≥ 4. Run that commissioning pipeline before relying on the instances; we do
+> **not** fabricate ratings. Also note `eval()`'s task-level
+> `metrics["task_success"]` is the *mean of P̂ over instances* — a convenience
+> aggregate, **not** a methodology output (the methodology sorts the per-instance P̂
+> into quantiles and fits the pTQ / automation-halvings curves).
 
 ## Install
 
