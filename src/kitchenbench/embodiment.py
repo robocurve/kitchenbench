@@ -32,6 +32,9 @@ from robolens import (
 )
 from robolens.embodiment import PRIVILEGED_SUCCESS, RENDERABLE, SEEDABLE
 
+from kitchenbench.specs import SPEC_BY_KEY
+from kitchenbench.tasks import realize_scene
+
 _IMG = 24
 
 _ACTION_SPACE = Box(
@@ -81,7 +84,14 @@ class KitchenEmbodiment:
         self._progress = 0.0
         self._last = np.zeros(8, dtype=np.float64)
         self.num_steps = 0
-        return self._observe(scene.instruction)
+        # For a KitchenBench scene, realize the task instance for this seed so the
+        # observed instruction reflects the per-epoch realization (a real embodiment
+        # / operator would also arrange the sampled setup). The realization rng is
+        # independent of the goal_dir rng above. Bare scenes fall back unchanged.
+        instruction = scene.instruction
+        if scene.metadata.get("task") in SPEC_BY_KEY:
+            instruction = realize_scene(scene, seed).instruction
+        return self._observe(instruction)
 
     def step(self, action: Action) -> StepResult:
         self.num_steps += 1

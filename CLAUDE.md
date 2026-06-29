@@ -12,8 +12,17 @@ and registers them via entry points.
 A benchmark is **embodiment-agnostic**: it defines *what* to evaluate (scenes +
 scorers), never *how* the robot is built. The same 10 tasks run against the
 dependency-free mock kitchen (for CI) and against real **YAM bimanual arms +
-MolmoAct2** (tomorrow's hardware run) — only the `Policy`/`Embodiment` change.
-The 10 tasks expand their variation axes into 37 `Scene`s.
+MolmoAct2** — only the `Policy`/`Embodiment` change.
+
+Each task is a set of **task instances** (the
+[physical-automation methodology](https://github.com/jeqcho/physical-automation-methodology-docs),
+cloned read-only into `reference/`, gitignored). A task instance is a *stochastic
+environment spec* (named random variables + **distributions**) + a goal. Defaults
+follow the methodology: **5 instances per task** (one `Scene` each) × **5
+realizations per instance** (`Epochs(count=5, reducer="mean")`) = 50 scenes. The
+mean over 5 realizations makes each scene's reduced `task_success` the instance
+success probability **P̂[Yᵢ=1]**. Instances are AI-authored drafts
+(`Validation(source="opus-draft")`, `validated=False`) — not yet human-validated.
 
 ## Layout
 
@@ -21,8 +30,10 @@ The 10 tasks expand their variation axes into 37 `Scene`s.
   module map and how to add a task).
 - `tests/` — pytest; the mock `KitchenEmbodiment` + scripted policy exercise the
   whole stack with no hardware.
-- `plans/0001-kitchenbench-design.md` — the design doc (read before changing the
-  task set or the mock).
+- `plans/0002-task-instances-distributions.md` — the design doc for the
+  task-instance/distribution model (read before changing the task set, the
+  distributions, or the 5×5 defaults).
+- `reference/` — read-only local copy of the methodology PDFs (gitignored).
 - `README.md` — the task table + how to run on the mock and on YAM/MolmoAct2.
 
 ## Working here (important gotchas)

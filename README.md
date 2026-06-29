@@ -26,21 +26,51 @@ designed to point straight at real hardware — e.g. **YAM bimanual arms** drive
 
 ## The tasks
 
-| Task (`--task`) | Instruction | Variations | Bimanual | Category |
-|---|---|---|:--:|---|
-| `kitchenbench/place_cutlery` | place the {cutlery} on the {dishware} | spoon/fork/knife × plate/bowl/napkin | | pick-place |
-| `kitchenbench/stack` | stack the {items} | cups/bowls/plates | | stacking |
-| `kitchenbench/place_in_rack` | place the {dishware} into the dish rack | plate/bowl/cup | | insertion |
-| `kitchenbench/pour_pasta` | pour the dry pasta into the {vessel} | bowl/cup/pot | ✅ | granular |
-| `kitchenbench/open_container` | open the {container} | jar/bottle/food container | ✅ | articulated |
-| `kitchenbench/fold_cloth` | fold the {cloth} | dish towel/napkin/cloth | ✅ | deformable |
-| `kitchenbench/seal_container` | seal the {container} with its lid | food container/pot/jar | ✅ | mating |
-| `kitchenbench/handoff` | hand off the {item} from one arm to the other | utensil/cup/produce item | ✅ | coordination |
-| `kitchenbench/sort_cutlery` | sort the cutlery into the correct tray compartments | 3 pile layouts | | classification |
-| `kitchenbench/scoop_pasta` | scoop the {pasta} with the {tool} and transfer it to the container | penne/rigatoni × spoon/measuring cup | ✅ | granular+tool |
+| Task (`--task`) | Goal | Bimanual | Category |
+|---|---|:--:|---|
+| `kitchenbench/place_cutlery` | place the {cutlery} on the {dishware} | | pick-place |
+| `kitchenbench/stack` | stack the {items} | | stacking |
+| `kitchenbench/place_in_rack` | place the {dishware} into the dish rack | | insertion |
+| `kitchenbench/pour_pasta` | pour the dry pasta into the {vessel} | ✅ | granular |
+| `kitchenbench/open_container` | open the {container} | ✅ | articulated |
+| `kitchenbench/fold_cloth` | fold the {cloth} | ✅ | deformable |
+| `kitchenbench/seal_container` | seal the {container} with its lid | ✅ | mating |
+| `kitchenbench/handoff` | hand off the {item} from one arm to the other | ✅ | coordination |
+| `kitchenbench/sort_cutlery` | sort the cutlery into the correct tray compartments | | classification |
+| `kitchenbench/scoop_pasta` | scoop the {pasta} with the {tool} and transfer it to the container | ✅ | granular+tool |
 
-Each task expands its variation axes into one `Scene` per combination (37 scenes
-total), each with a filled-in language instruction and a success `Target`.
+## Task instances & realizations
+
+KitchenBench follows the
+[physical-automation methodology](https://github.com/jeqcho/physical-automation-methodology-docs):
+each task is a set of **task instances**, and each instance is a *stochastic
+environment specification* — named random variables with **distributions** — plus
+a goal. Defaults match the methodology's recommendations:
+
+- **5 instances per task** (`K_INSTANCES`) → one RoboLens `Scene` each.
+- **5 realizations per instance** (`K_REALIZATIONS`) → run via
+  `Epochs(count=5, reducer="mean")`. Each realization samples the instance's
+  random variables (seeded per epoch) into one concrete environment.
+
+```python
+from kitchenbench import SPEC_BY_KEY, realize_scene
+inst = SPEC_BY_KEY["pour_pasta"].instances[0]
+inst.setup_spec()          # {'fill_g': 'Uniform[80, 200]', 'vessel': 'Categorical({bowl, cup, pot})', ...}
+inst.realize(seed=0).instruction   # a concrete goal, e.g. "pour the dry pasta into the cup"
+```
+
+The mean reducer over 5 realizations makes the **per-scene reduced `task_success`
+the instance success probability P̂[Yᵢ=1]** — exactly the methodology's estimator.
+On real hardware, an embodiment/operator calls `realize_scene(scene, seed)` to get
+the concrete setup to arrange (`Realization.setup_lines`).
+
+Distribution types: `Uniform[a,b]`, `Categorical({…})`, `N(μ,σ²)`, `Constant`.
+
+> **Validation status.** The shipped instances are AI-authored drafts
+> (`Validation(source="opus-draft")`, `validated=False`). The methodology's
+> `K_i = 5` is *after* human validation (3 experts, representativeness & quality
+> ≥ 4); run that commissioning pipeline before trusting the instances. We do **not**
+> fabricate ratings.
 
 ## Install
 
@@ -66,12 +96,20 @@ Or in Python:
 from robolens import eval
 
 (log,) = eval("kitchenbench/open_container", "kitchen_scripted", "kitchen")
-print(log.status, log.results.metrics)    # success {'task_success': 1.0, 'episode_length': ...}
+# Per-instance success probability P̂[Yᵢ=1] lives in each sample's reduced score:
+for s in log.samples:
+    print(s.scene_id, s.reduced["task_success"])
+# log.results.metrics["task_success"] is the mean of P̂ over instances — a
+# convenience aggregate, NOT a methodology quantity (the methodology sorts P̂ into
+# quantiles and fits pTQ / automation-halvings; out of scope here).
 ```
 
 The mock is abstract (it models *progress toward the scene goal*, like RoboLens's
-`CubePick`) — its job is to exercise the pipeline and give you a template. The
-**value is the task definitions**, which run unchanged on a real robot.
+`CubePick`) — its job is to exercise the pipeline and give you a template. **In the
+mock, success depends only on the seeded goal direction, so the sampled setup
+distributions have no causal effect** (P̂ is degenerately 1.0 for the scripted
+oracle); the distribution *content* only bites on a real embodiment. The **value is
+the task definitions**, which run unchanged on a real robot.
 
 ## Run it on real hardware (YAM arms + MolmoAct2)
 

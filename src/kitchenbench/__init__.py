@@ -9,7 +9,22 @@ entry points without importing).
 
 from __future__ import annotations
 
+from kitchenbench.distributions import (
+    Categorical,
+    Constant,
+    Distribution,
+    Normal,
+    Uniform,
+)
 from kitchenbench.embodiment import KitchenEmbodiment
+from kitchenbench.instances import (
+    K_EXPERTS,
+    K_INSTANCES,
+    K_REALIZATIONS,
+    Realization,
+    TaskInstance,
+    Validation,
+)
 from kitchenbench.policies import (
     NoopKitchenPolicy,
     RandomKitchenPolicy,
@@ -27,6 +42,7 @@ from kitchenbench.tasks import (
     place_cutlery,
     place_in_rack,
     pour_pasta,
+    realize_scene,
     scoop_pasta,
     seal_container,
     sort_cutlery,
@@ -36,14 +52,25 @@ from kitchenbench.tasks import (
 __version__ = "0.1.0"
 
 __all__ = [
+    "K_EXPERTS",
+    "K_INSTANCES",
+    "K_REALIZATIONS",
     "SPECS",
     "SPEC_BY_KEY",
     "TASK_FACTORIES",
+    "Categorical",
+    "Constant",
+    "Distribution",
     "KitchenEmbodiment",
     "NoopKitchenPolicy",
+    "Normal",
     "RandomKitchenPolicy",
+    "Realization",
     "ScriptedKitchenPolicy",
+    "TaskInstance",
     "TaskSpec",
+    "Uniform",
+    "Validation",
     "__version__",
     "build_scenes",
     "fold_cloth",
@@ -53,6 +80,7 @@ __all__ = [
     "place_cutlery",
     "place_in_rack",
     "pour_pasta",
+    "realize_scene",
     "scoop_pasta",
     "seal_container",
     "sort_cutlery",

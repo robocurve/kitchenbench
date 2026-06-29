@@ -1,18 +1,26 @@
 """The 10 KitchenBench tasks, generated from :data:`kitchenbench.specs.SPECS`.
 
+Each task instance (a stochastic setup + goal) becomes one RoboLens ``Scene``;
+each task runs ``K_REALIZATIONS`` (5) realizations per instance via
+``Epochs(count=5, reducer="mean")``, so the per-scene reduced ``task_success`` is
+the methodology's instance success probability P̂[Yᵢ=1]. With ``K_INSTANCES`` (5)
+instances per task that is 5 scenes x 5 epochs per task.
+
 Each task is registered with RoboLens under ``kitchenbench/<key>`` (the slash
 namespaces KitchenBench within WorldEvals). The entry-point name, the ``@task``
-name, and the returned ``Task.name`` are all identical so the CLI, the registry,
-and ``import``-time registration agree.
+name, and the returned ``Task.name`` are all identical.
 """
 
 from __future__ import annotations
 
 import re
-from itertools import product
+from dataclasses import asdict
+from typing import Any
 
-from robolens import Scene, Target, Task, episode_length, task
+from robolens import Epochs, Scene, Target, Task, episode_length, task
+from robolens.rollout import derive_seed
 
+from kitchenbench.instances import K_INSTANCES, K_REALIZATIONS, Realization
 from kitchenbench.scoring import task_success
 from kitchenbench.specs import SPEC_BY_KEY, TaskSpec
 
@@ -23,29 +31,51 @@ def _slug(text: str) -> str:
     return _SLUG_RE.sub("-", text.lower()).strip("-")
 
 
+def _validation_dict(spec_validation: Any) -> dict[str, Any]:
+    """``asdict`` a Validation, casting rating tuples to lists for clean JSON."""
+    return {k: (list(v) if isinstance(v, tuple) else v) for k, v in asdict(spec_validation).items()}
+
+
 def build_scenes(spec: TaskSpec) -> list[Scene]:
-    """Build one scene per combination of the spec's variation axes."""
-    names = list(spec.axes)
+    """Build one Scene per task instance (5 per task)."""
     scenes: list[Scene] = []
-    for i, combo in enumerate(product(*(spec.axes[name] for name in names))):
-        values = dict(zip(names, combo, strict=True))
-        scene_id = "-".join([spec.key, *(_slug(v) for v in combo)])
+    for index, inst in enumerate(spec.instances):
+        # The displayed instruction is the realization of epoch 0 under the default
+        # eval(seed=0), so it equals the first actual rollout's instruction.
+        canonical = inst.realize(derive_seed(0, index, 0))
         scenes.append(
             Scene(
-                id=scene_id,
-                instruction=spec.instruction.format(**values),
-                target=Target(kind=spec.target_kind, spec={**values, **spec.extra}),
-                init_seed=i,
+                id=_slug(inst.instance_id),
+                instruction=canonical.instruction,
+                target=Target(kind=inst.target_kind, spec=dict(inst.static)),
+                init_seed=index,
                 metadata={
                     "task": spec.key,
                     "category": spec.category,
                     "bimanual": spec.bimanual,
                     "version": spec.version,
-                    "axes": values,
+                    "instance_id": inst.instance_id,
+                    "instance_index": index,
+                    "setup": inst.setup_spec(),
+                    "language_vars": list(inst.language_vars),
+                    "validation": _validation_dict(inst.validation),
                 },
             )
         )
     return scenes
+
+
+def realize_scene(scene: Scene, seed: int | None) -> Realization:
+    """Recover the task instance behind a Scene and realize it for ``seed``.
+
+    The seam a real embodiment / operator tool uses to get the concrete setup for
+    a given realization. ``seed=None`` (direct ``reset(scene)`` calls) is guarded
+    to ``0`` for determinism.
+    """
+    key = str(scene.metadata["task"])
+    index = int(scene.metadata["instance_index"])
+    inst = SPEC_BY_KEY[key].instances[index]
+    return inst.realize(seed if seed is not None else 0)
 
 
 def make_task(spec: TaskSpec) -> Task:
@@ -55,12 +85,15 @@ def make_task(spec: TaskSpec) -> Task:
         scenes=build_scenes(spec),
         scorer=[task_success(), episode_length()],
         max_steps=spec.max_steps,
+        epochs=Epochs(count=K_REALIZATIONS, reducer="mean"),
         metadata={
             "title": spec.title,
             "category": spec.category,
             "bimanual": spec.bimanual,
             "version": spec.version,
             "description": spec.description,
+            "k_instances": K_INSTANCES,
+            "k_realizations": K_REALIZATIONS,
         },
     )
 

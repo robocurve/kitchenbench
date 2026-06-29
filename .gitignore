@@ -219,3 +219,6 @@ __marimo__/
 
 # uv lockfile (this is a library; CI resolves from pyproject)
 uv.lock
+
+# Local read-only copy of the methodology reference (not part of the package)
+reference/
