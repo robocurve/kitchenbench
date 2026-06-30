@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from robolens import Action, eval
-from robolens.rollout import TrialRecord
-from robolens.scene import Scene
+from roboinspect import Action, eval
+from roboinspect.rollout import TrialRecord
+from roboinspect.scene import Scene
 
 from kitchenbench.embodiment import KitchenEmbodiment
 from kitchenbench.policies import (

@@ -4,17 +4,17 @@
 
 **A bimanual kitchen-manipulation benchmark for VLA models.**
 
-Built on [RoboLens](https://github.com/robocurve/robolens) · part of
+Built on [RoboInspect](https://github.com/robocurve/roboinspect) · part of
 [WorldEvals](https://github.com/robocurve/worldevals), the "Inspect Evals for robotics".
 
 [![CI](https://github.com/robocurve/kitchenbench/actions/workflows/ci.yml/badge.svg)](https://github.com/robocurve/kitchenbench/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/robocurve/kitchenbench/actions/workflows/ci.yml)
-[![Built on RoboLens](https://img.shields.io/badge/built%20on-RoboLens-indigo)](https://github.com/robocurve/robolens)
+[![Built on RoboInspect](https://img.shields.io/badge/built%20on-RoboInspect-indigo)](https://github.com/robocurve/roboinspect)
 
 </div>
 
-KitchenBench is **10 kitchen-manipulation tasks** expressed as RoboLens `Task`s —
+KitchenBench is **10 kitchen-manipulation tasks** expressed as RoboInspect `Task`s —
 embodiment-agnostic, so you run them against *any* compatible policy/embodiment.
 The set emphasizes **bimanual coordination**: pouring, lid removal, folding,
 part-mating, a pure two-arm handover, and tool-mediated scooping, alongside
@@ -122,13 +122,13 @@ r.setup_lines     # ('fill_g = 156.43…', 'pour_height_cm = 9.88…', 'vessel =
 
 ### How it maps to a run
 
-Each instance becomes one RoboLens `Scene`; the 5 realizations are the 5 **epochs**
+Each instance becomes one RoboInspect `Scene`; the 5 realizations are the 5 **epochs**
 (`Epochs(count=5, reducer="mean")`), each seeded independently. Because the reducer
 is the mean, **each scene's reduced `task_success` is the instance success
 probability P̂[Yᵢ = 1]** — exactly the methodology's estimator:
 
 ```python
-from robolens import eval
+from roboinspect import eval
 (log,) = eval("kitchenbench/pour_pasta", "kitchen_scripted", "kitchen")
 for s in log.samples:
     print(s.scene_id, s.reduced["task_success"])   # one P̂ per instance
@@ -157,8 +157,8 @@ category samples back as an `int`).
 ## Install
 
 ```bash
-# RoboLens isn't on PyPI yet, so install both from GitHub (uv recommended):
-uv pip install "robolens @ git+https://github.com/robocurve/robolens@v0.1.0"
+# RoboInspect isn't on PyPI yet, so install both from GitHub (uv recommended):
+uv pip install "roboinspect @ git+https://github.com/robocurve/roboinspect@v0.1.0"
 uv pip install "kitchenbench @ git+https://github.com/robocurve/kitchenbench"
 ```
 
@@ -168,14 +168,14 @@ KitchenBench registers a dependency-free mock embodiment (`kitchen`) and policie
 (`kitchen_scripted` / `kitchen_random` / `kitchen_noop`) via entry points:
 
 ```bash
-robolens list tasks                       # see all kitchenbench/* tasks
-robolens run --task kitchenbench/pour_pasta --policy kitchen_scripted --embodiment kitchen
+roboinspect list tasks                       # see all kitchenbench/* tasks
+roboinspect run --task kitchenbench/pour_pasta --policy kitchen_scripted --embodiment kitchen
 ```
 
 Or in Python:
 
 ```python
-from robolens import eval
+from roboinspect import eval
 
 (log,) = eval("kitchenbench/open_container", "kitchen_scripted", "kitchen")
 # Per-instance success probability P̂[Yᵢ=1] lives in each sample's reduced score:
@@ -186,7 +186,7 @@ for s in log.samples:
 # quantiles and fits pTQ / automation-halvings; out of scope here).
 ```
 
-The mock is abstract (it models *progress toward the scene goal*, like RoboLens's
+The mock is abstract (it models *progress toward the scene goal*, like RoboInspect's
 `CubePick`) — its job is to exercise the pipeline and give you a template. **In the
 mock, success depends only on the seeded goal direction, so the sampled setup
 distributions have no causal effect** (P̂ is degenerately 1.0 for the scripted
@@ -196,7 +196,7 @@ the task definitions**, which run unchanged on a real robot.
 ## Run it on real hardware (YAM arms + MolmoAct2)
 
 KitchenBench tasks are embodiment-agnostic. To evaluate on real **YAM bimanual
-arms** with **MolmoAct2**, provide two RoboLens components (e.g. in your own
+arms** with **MolmoAct2**, provide two RoboInspect components (e.g. in your own
 adapter package such as `robocurve/embodiments`):
 
 - a **`Policy`** wrapping MolmoAct2: `act(observation) -> ActionChunk` (the
@@ -210,16 +210,16 @@ adapter package such as `robocurve/embodiments`):
   capability and pace the control loop inside `step()`.
 
 ```bash
-robolens run --task kitchenbench/pour_pasta --policy molmoact2 --embodiment yam_arms
+roboinspect run --task kitchenbench/pour_pasta --policy molmoact2 --embodiment yam_arms
 ```
 
-RoboLens checks `(policy, embodiment)` compatibility (action dims, semantics,
+RoboInspect checks `(policy, embodiment)` compatibility (action dims, semantics,
 camera/state keys) before any motion and writes an immutable `EvalLog`.
 
 ## Development
 
 ```bash
-uv venv && uv pip install -e ".[dev]"     # robolens resolved from the v0.1.0 tag
+uv venv && uv pip install -e ".[dev]"     # roboinspect resolved from the v0.1.0 tag
 uv run pre-commit install
 uv run pytest --cov                        # 100% coverage required
 uv run ruff check . && uv run mypy

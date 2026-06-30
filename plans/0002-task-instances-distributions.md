@@ -28,9 +28,9 @@ The methodology PDFs are cloned read-only into `reference/` (gitignored).
   `N(μ, σ²)` (Gaussian, incl. 2-D centroid jitter as two independent Gaussians),
   and discrete `Uniform({…})` over a finite integer set (≡ `Categorical` of ints).
 
-## 2. Clean mapping onto RoboLens (no framework changes needed)
+## 2. Clean mapping onto RoboInspect (no framework changes needed)
 
-| Methodology | RoboLens | Notes |
+| Methodology | RoboInspect | Notes |
 |---|---|---|
 | task instance `i ∈ t` | one `Scene` | 5 scenes per task (`K_i = 5`) |
 | realization `k` | one **epoch** | `derive_seed(eval_seed, scene.init_seed, epoch)` varies each realization deterministically |
@@ -44,7 +44,7 @@ instances, epochs are realizations, the mean reducer yields the success
 probability the methodology defines.
 
 **Verified against source (critique round 1):** `"mean"` is a registered reducer
-(`robolens/scorer.py`); `eval()` persists `SceneResult.reduced["task_success"] =
+(`roboinspect/scorer.py`); `eval()` persists `SceneResult.reduced["task_success"] =
 mean over epochs` in `EvalLog.samples` (`eval.py`), which *is* P̂[Yᵢ=1]; the **same
 `Scene` is reused across epochs** with only `derive_seed(eval_seed, init_seed,
 epoch)` varying (`eval.py`/`rollout.py`), so realization-via-seed is correct.
@@ -132,7 +132,7 @@ class TaskInstance:
 ```
 `realize(seed)` builds `np.random.default_rng(seed)`, samples `setup` in **sorted
 key order** (determinism), formats `goal` with **only** the `language_vars`, and
-renders `setup_lines` from `f"{k} = {v}"`. Pure; no RoboLens import. Every
+renders `setup_lines` from `f"{k} = {v}"`. Pure; no RoboInspect import. Every
 `{placeholder}` in `goal` must be in `language_vars` (and in `setup`) — enforced by
 a test that realizes all 50 instances (§8).
 
@@ -299,4 +299,4 @@ variation is tested by `len({draw for seed in range(20)}) > 1` over a batch —
 ## 10. Out of scope
 
 Running the human commissioning/validation pipeline (Prolific), the forecasting
-plots (pTQ / automation halvings), and changing RoboLens core (none needed).
+plots (pTQ / automation halvings), and changing RoboInspect core (none needed).

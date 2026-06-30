@@ -1,30 +1,30 @@
 # KitchenBench — design
 
 > **KitchenBench** is a bimanual kitchen-manipulation benchmark for VLA models,
-> built on [RoboLens](https://github.com/robocurve/robolens). It is a *standalone
+> built on [RoboInspect](https://github.com/robocurve/roboinspect). It is a *standalone
 > plugin repo* (the first member of [WorldEvals](https://github.com/robocurve/worldevals),
-> the "Inspect Evals for robotics"). It ships **10 tasks** as RoboLens `Task`s,
+> the "Inspect Evals for robotics"). It ships **10 tasks** as RoboInspect `Task`s,
 > registered via entry points, plus a dependency-free mock kitchen so the whole
 > thing runs in CI — and is ready to point at real **YAM arms + MolmoAct2**.
 
 ## Goals / non-goals
 
 - **Goal:** a clean, reproducible set of kitchen `Task`s (scenes + scorers),
-  embodiment-agnostic, that a researcher can run with `robolens run --task
+  embodiment-agnostic, that a researcher can run with `roboinspect run --task
   kitchenbench/place_cutlery --policy <vla> --embodiment <robot|sim>`.
 - **Goal:** runnable *today* with a mock embodiment (CI, 100% coverage) and a
   scripted policy, serving as the template for a real YAM-arms embodiment.
-- **Goal:** mirror the things RoboLens already established — `Task = scenes +
+- **Goal:** mirror the things RoboInspect already established — `Task = scenes +
   scorer`, registry/entry-points, immutable `EvalLog`. Mirror Inspect Evals'
   conventions: co-located per-task metadata, a registry that re-exports every
   task (with a test enforcing reachability), and a README task table.
-- **Non-goal:** a physics simulator. The mock is abstract (like RoboLens's
+- **Non-goal:** a physics simulator. The mock is abstract (like RoboInspect's
   `CubePick`); the *value* is the task definitions, which are real and usable on
   hardware. The real YAM-arms embodiment + MolmoAct2 policy live elsewhere.
 
 ## The 10 tasks
 
-Each task is a RoboLens `@task` factory whose scenes are the Cartesian product of
+Each task is a RoboInspect `@task` factory whose scenes are the Cartesian product of
 its variation axes. `bimanual=True` marks tasks that genuinely need two arms.
 
 | key | instruction template | axes | target kind | bimanual | category |
@@ -54,7 +54,7 @@ consistency, not a single lucky success).
 
 ```
 kitchenbench/
-  pyproject.toml            # depends on robolens (git dep until PyPI); entry points
+  pyproject.toml            # depends on roboinspect (git dep until PyPI); entry points
   src/kitchenbench/
     __init__.py             # re-exports all 10 task factories (reachability)
     py.typed
@@ -89,7 +89,7 @@ class TaskSpec:
 `kitchenbench/<key>` (slashed namespace so WorldEvals can host many benchmarks
 without key collisions). The factory builds the scene dataset via the axis
 product. A `make_task(spec)` helper + a loop register all 10; `__init__` and
-`_registry` import them so `robolens list` / entry points see every task. A test
+`_registry` import them so `roboinspect list` / entry points see every task. A test
 asserts the entry-point set == the SPECS set (Inspect-style reachability guard).
 
 ### Scoring
@@ -104,7 +104,7 @@ def task_success() -> Scorer:
     # confirmed success) OR an affirmative operator verdict was recorded.
 ```
 
-Also expose RoboLens's `operator_scorer` and `episode_length` for convenience.
+Also expose RoboInspect's `operator_scorer` and `episode_length` for convenience.
 Each task uses `[task_success(), episode_length()]`.
 
 ### Mock embodiment (`KitchenEmbodiment`)
@@ -142,7 +142,7 @@ their own adapter packages (e.g. `robocurve/embodiments`). Compatibility is
 checked at `eval()` time; instructions feed the VLA verbatim. README documents
 the exact command and the `Embodiment`/`Policy` contract to implement.
 
-## Quality bar (same as RoboLens)
+## Quality bar (same as RoboInspect)
 
 - `pyproject` (hatchling + hatch-vcs); MIT; `py.typed`.
 - `ruff` + `ruff format` + `mypy --strict` + `pytest`.
@@ -155,10 +155,10 @@ the exact command and the `Embodiment`/`Policy` contract to implement.
 
 ## Milestones (commit/push each)
 
-- **M0** repo skeleton, packaging (robolens git dep), CI, pre-commit, README stub.
+- **M0** repo skeleton, packaging (roboinspect git dep), CI, pre-commit, README stub.
 - **M1** `specs` + `tasks` (10 factories, scene generation) + reachability test.
 - **M2** `KitchenEmbodiment` + policies + `scoring` + integration tests (eval all
   10 with scripted → success) → 100% coverage.
-- **M3** entry points wired; `robolens list`/`run` works; README task table +
+- **M3** entry points wired; `roboinspect list`/`run` works; README task table +
   usage + YAM/MolmoAct2 instructions.
 - **M4** branch protection, push, register in WorldEvals.

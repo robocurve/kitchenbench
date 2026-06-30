@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kitchenbench"
-version = "0.1.0"
-description = "A bimanual kitchen-manipulation benchmark for VLA models, built on RoboLens."
+version = "0.2.0"
+description = "A bimanual kitchen-manipulation benchmark for VLA models, built on RoboInspect."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -20,7 +20,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Typing :: Typed",
 ]
-dependencies = ["robolens>=0.1", "numpy>=1.24"]
+dependencies = ["roboinspect>=0.2", "numpy>=1.24"]
 
 [project.optional-dependencies]
 dev = [
@@ -34,17 +34,17 @@ dev = [
 [project.urls]
 Homepage = "https://github.com/robocurve/kitchenbench"
 Collection = "https://github.com/robocurve/worldevals"
-Framework = "https://github.com/robocurve/robolens"
+Framework = "https://github.com/robocurve/roboinspect"
 
-# RoboLens isn't on PyPI yet — resolve it from the tagged GitHub release. This is
+# RoboInspect isn't on PyPI yet — resolve it from the tagged GitHub release. This is
 # uv-only metadata (stripped from the published package), so CI uses uv. For local
 # development against a sibling checkout, override with an editable install:
-#   uv pip install -e ../robolens
+#   uv pip install -e ../roboinspect
 [tool.uv.sources]
-robolens = { git = "https://github.com/robocurve/robolens", tag = "v0.1.0" }
+roboinspect = { git = "https://github.com/robocurve/roboinspect", tag = "v0.2.0" }
 
-# RoboLens discovers these by entry point — no import needed for `robolens list`.
-[project.entry-points."robolens.tasks"]
+# RoboInspect discovers these by entry point — no import needed for `roboinspect list`.
+[project.entry-points."roboinspect.tasks"]
 "kitchenbench/place_cutlery" = "kitchenbench.tasks:place_cutlery"
 "kitchenbench/stack" = "kitchenbench.tasks:stack"
 "kitchenbench/place_in_rack" = "kitchenbench.tasks:place_in_rack"
@@ -56,10 +56,10 @@ robolens = { git = "https://github.com/robocurve/robolens", tag = "v0.1.0" }
 "kitchenbench/sort_cutlery" = "kitchenbench.tasks:sort_cutlery"
 "kitchenbench/scoop_pasta" = "kitchenbench.tasks:scoop_pasta"
 
-[project.entry-points."robolens.embodiments"]
+[project.entry-points."roboinspect.embodiments"]
 kitchen = "kitchenbench.embodiment:KitchenEmbodiment"
 
-[project.entry-points."robolens.policies"]
+[project.entry-points."roboinspect.policies"]
 kitchen_scripted = "kitchenbench.policies:ScriptedKitchenPolicy"
 kitchen_random = "kitchenbench.policies:RandomKitchenPolicy"
 kitchen_noop = "kitchenbench.policies:NoopKitchenPolicy"

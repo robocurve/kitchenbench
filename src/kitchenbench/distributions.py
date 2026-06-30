@@ -3,7 +3,7 @@
 A task instance (see :mod:`kitchenbench.instances`) specifies a *stochastic*
 environment: each setup variable is a :class:`Distribution`. A *realization*
 samples every variable to produce one concrete environment. These types are pure
-NumPy with no RoboLens dependency.
+NumPy with no RoboInspect dependency.
 
 Distributions mirror the methodology's notation
 (:doc:`reference/physical-automation-methodology-docs`):
