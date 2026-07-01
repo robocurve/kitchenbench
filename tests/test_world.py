@@ -72,6 +72,16 @@ def test_embodiment_zero_and_misaligned_actions_make_no_progress() -> None:
     assert not emb.step(opposite).terminated
 
 
+def test_embodiment_instruction_persists_across_steps() -> None:
+    # Real VLA policies re-condition on the instruction at every act() call, so
+    # step observations must carry it, not just the reset observation.
+    emb = KitchenEmbodiment()
+    obs = emb.reset(_SCENE, seed=0)
+    assert obs.instruction == "do the thing"
+    result = emb.step(Action(data=np.zeros(8)))
+    assert result.observation.instruction == "do the thing"
+
+
 def test_embodiment_close_and_render_bar() -> None:
     emb = KitchenEmbodiment()
     obs = emb.reset(_SCENE, seed=1)

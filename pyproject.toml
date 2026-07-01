@@ -79,7 +79,10 @@ select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF"]
 known-first-party = ["kitchenbench"]
 
 [tool.mypy]
-python_version = "3.10"
+# numpy >= 2.5 ships stubs that use PEP 695 `type` statements, which mypy only
+# accepts when targeting >= 3.12 — so type-check against 3.12 while runtime
+# support stays >= 3.10 (ruff's target-version enforces the 3.10 syntax floor).
+python_version = "3.12"
 strict = true
 files = ["src/kitchenbench"]
 

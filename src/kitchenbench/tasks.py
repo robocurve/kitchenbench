@@ -50,6 +50,7 @@ def build_scenes(spec: TaskSpec) -> list[Scene]:
                 target=Target(kind=inst.target_kind, spec=dict(inst.static)),
                 init_seed=index,
                 metadata={
+                    "benchmark": "kitchenbench",
                     "task": spec.key,
                     "category": spec.category,
                     "bimanual": spec.bimanual,
@@ -69,13 +70,18 @@ def realize_scene(scene: Scene, seed: int | None) -> Realization:
     """Recover the task instance behind a Scene and realize it for ``seed``.
 
     The seam a real embodiment / operator tool uses to get the concrete setup for
-    a given realization. ``seed=None`` (direct ``reset(scene)`` calls) is guarded
-    to ``0`` for determinism.
+    a given realization. Recovery is by ``instance_id`` (stable across releases),
+    not by position — a scene logged under an older task set either resolves to
+    the same instance or fails loudly, never silently realizes a different one.
+    ``seed=None`` (direct ``reset(scene)`` calls) is guarded to ``0`` for
+    determinism.
     """
     key = str(scene.metadata["task"])
-    index = int(scene.metadata["instance_index"])
-    inst = SPEC_BY_KEY[key].instances[index]
-    return inst.realize(seed if seed is not None else 0)
+    instance_id = str(scene.metadata["instance_id"])
+    for inst in SPEC_BY_KEY[key].instances:
+        if inst.instance_id == instance_id:
+            return inst.realize(seed if seed is not None else 0)
+    raise LookupError(f"no instance {instance_id!r} in task {key!r} (removed or renamed?)")
 
 
 def make_task(spec: TaskSpec) -> Task:
