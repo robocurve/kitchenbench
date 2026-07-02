@@ -1,10 +1,10 @@
 # KitchenBench — agent guide
 
 KitchenBench is a **standalone benchmark repo**: 10 bimanual kitchen-manipulation
-tasks for VLA models, expressed as [RoboInspect](https://github.com/robocurve/roboinspect)
+tasks for VLA models, expressed as [Inspect Robots](https://github.com/robocurve/inspect-robots)
 `Task`s. It is the first member of
 [WorldEvals](https://github.com/robocurve/worldevals) (the "Inspect Evals for
-robotics"). It is a **RoboInspect plugin** — it depends on RoboInspect, defines tasks,
+robotics"). It is a **Inspect Robots plugin** — it depends on Inspect Robots, defines tasks,
 and registers them via entry points.
 
 ## The one big idea
@@ -38,11 +38,11 @@ success probability **P̂[Yᵢ=1]**. Instances are AI-authored drafts
 
 ## Working here (important gotchas)
 
-- **Dependency on RoboInspect is a git tag.** `pyproject.toml` declares
-  `roboinspect>=0.1` with `[tool.uv.sources] roboinspect = { git = ..., tag = "v0.1.0" }`.
+- **Dependency on Inspect Robots is a git tag.** `pyproject.toml` declares
+  `inspect-robots>=0.1` with `[tool.uv.sources] inspect-robots = { git = ..., tag = "v0.1.0" }`.
   CI uses `uv` (plain pip ignores `tool.uv.sources`). A sibling checkout exists at
-  `../roboinspect`; for local dev against it, override with
-  `uv pip install -e ../roboinspect`.
+  `../inspect-robots`; for local dev against it, override with
+  `uv pip install -e ../inspect-robots`.
 - **Conda is active in this shell.** `uv pip install` targets the *active* env, so
   a bare `uv pip install -e .` lands in conda base, not `.venv`. Always
   `source .venv/bin/activate && export VIRTUAL_ENV="$PWD/.venv"` first (or use
@@ -53,11 +53,11 @@ success probability **P̂[Yᵢ=1]**. Instances are AI-authored drafts
   (strict), `pytest --cov` at **100% coverage**. Pre-commit runs ruff+mypy on
   commit and the coverage gate on push (via `uv run`). CI (Linux+macOS ×
   py3.11/3.12) and the 100% gate are **required, blocking PR checks**.
-- **Authoring imports come from the top-level `roboinspect` package** (its public
-  API, stable as of v0.1.0): `from roboinspect import Task, Scene, Target, task,
-  ActionChunk, ...`. Don't import from `roboinspect.<submodule>` unless a symbol
+- **Authoring imports come from the top-level `inspect_robots` package** (its public
+  API, stable as of v0.1.0): `from inspect_robots import Task, Scene, Target, task,
+  ActionChunk, ...`. Don't import from `inspect_robots.<submodule>` unless a symbol
   isn't re-exported (capability flags like `SEEDABLE` live in
-  `roboinspect.embodiment`).
+  `inspect_robots.embodiment`).
 
 ## Out of scope (lives elsewhere)
 

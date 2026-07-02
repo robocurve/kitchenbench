@@ -6,14 +6,14 @@
   fails. Deterministic given the construction seed.
 - :class:`NoopKitchenPolicy` — zero actions; never moves.
 
-All emit :class:`~roboinspect.ActionChunk`\\ s with ``H > 1`` to exercise open-loop
+All emit :class:`~inspect_robots.ActionChunk`\\ s with ``H > 1`` to exercise open-loop
 chunk execution.
 """
 
 from __future__ import annotations
 
 import numpy as np
-from roboinspect import (
+from inspect_robots import (
     Action,
     ActionChunk,
     ActionSemantics,

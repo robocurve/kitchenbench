@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from roboinspect import Score, Scorer, Target, TrialRecord
+from inspect_robots import Score, Scorer, Target, TrialRecord
 
 # Affirmative operator verdicts (case-insensitive), for real-world runs.
 _AFFIRMATIVE = frozenset({"success", "pass", "yes", "y", "1", "true"})

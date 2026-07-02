@@ -6,9 +6,9 @@ import json
 from importlib.metadata import entry_points
 
 import pytest
-from roboinspect import Epochs, Task
-from roboinspect.registry import registered, resolve
-from roboinspect.rollout import derive_seed
+from inspect_robots import Epochs, Task
+from inspect_robots.registry import registered, resolve
+from inspect_robots.rollout import derive_seed
 
 from kitchenbench.instances import K_INSTANCES, K_REALIZATIONS
 from kitchenbench.specs import SPEC_BY_KEY, SPECS, TaskSpec
@@ -79,7 +79,7 @@ def test_build_scenes_slugifies_ids() -> None:
     assert any("measuring cup" in s.instruction for s in scenes)
 
 
-def test_tasks_registered_in_roboinspect() -> None:
+def test_tasks_registered_in_inspect_robots() -> None:
     reg = registered("task")
     for spec in SPECS:
         name = f"kitchenbench/{spec.key}"
@@ -90,12 +90,12 @@ def test_tasks_registered_in_roboinspect() -> None:
 def test_entry_points_match_specs() -> None:
     eps = {
         ep.name
-        for ep in entry_points(group="roboinspect.tasks")
+        for ep in entry_points(group="inspect_robots.tasks")
         if ep.name.startswith("kitchenbench/")
     }
     assert eps == {f"kitchenbench/{spec.key}" for spec in SPECS}
     ep = next(
-        e for e in entry_points(group="roboinspect.tasks") if e.name == "kitchenbench/handoff"
+        e for e in entry_points(group="inspect_robots.tasks") if e.name == "kitchenbench/handoff"
     )
     assert ep.load()().name == "kitchenbench/handoff"
 

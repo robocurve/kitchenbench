@@ -1,6 +1,6 @@
 """KitchenEmbodiment — a dependency-free abstract bimanual mock kitchen.
 
-It does **not** simulate physics; like RoboInspect's ``CubePick`` it models *progress
+It does **not** simulate physics; like Inspect Robots's ``CubePick`` it models *progress
 toward the scene goal* so the whole pipeline (scenes → chunked rollout → score →
 log) runs in CI with no hardware. The value of KitchenBench is the task
 definitions; this mock exists to exercise them and to serve as the template for a
@@ -19,7 +19,7 @@ matches exact dims, so the real arm pairs with a real VLA, not with this mock).
 from __future__ import annotations
 
 import numpy as np
-from roboinspect import (
+from inspect_robots import (
     Action,
     ActionSemantics,
     Box,
@@ -30,7 +30,7 @@ from roboinspect import (
     Scene,
     StepResult,
 )
-from roboinspect.embodiment import PRIVILEGED_SUCCESS, RENDERABLE, SEEDABLE
+from inspect_robots.embodiment import PRIVILEGED_SUCCESS, RENDERABLE, SEEDABLE
 
 from kitchenbench.specs import SPEC_BY_KEY
 from kitchenbench.tasks import realize_scene

@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kitchenbench"
-version = "0.2.0"
-description = "A bimanual kitchen-manipulation benchmark for VLA models, built on RoboInspect."
+version = "0.3.0"
+description = "A bimanual kitchen-manipulation benchmark for VLA models, built on Inspect Robots."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -20,7 +20,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Typing :: Typed",
 ]
-dependencies = ["roboinspect>=0.2", "numpy>=1.24"]
+dependencies = ["inspect-robots>=0.3", "numpy>=1.24"]
 
 [project.optional-dependencies]
 dev = [
@@ -34,17 +34,17 @@ dev = [
 [project.urls]
 Homepage = "https://github.com/robocurve/kitchenbench"
 Collection = "https://github.com/robocurve/worldevals"
-Framework = "https://github.com/robocurve/roboinspect"
+Framework = "https://github.com/robocurve/inspect-robots"
 
-# RoboInspect isn't on PyPI yet — resolve it from the tagged GitHub release. This is
+# Inspect Robots isn't on PyPI yet — resolve it from the tagged GitHub release. This is
 # uv-only metadata (stripped from the published package), so CI uses uv. For local
 # development against a sibling checkout, override with an editable install:
-#   uv pip install -e ../roboinspect
+#   uv pip install -e ../inspect-robots
 [tool.uv.sources]
-roboinspect = { git = "https://github.com/robocurve/roboinspect", tag = "v0.2.0" }
+inspect-robots = { git = "https://github.com/robocurve/inspect-robots", tag = "v0.3.0" }
 
-# RoboInspect discovers these by entry point — no import needed for `roboinspect list`.
-[project.entry-points."roboinspect.tasks"]
+# Inspect Robots discovers these by entry point — no import needed for `inspect-robots list`.
+[project.entry-points."inspect_robots.tasks"]
 "kitchenbench/place_cutlery" = "kitchenbench.tasks:place_cutlery"
 "kitchenbench/stack" = "kitchenbench.tasks:stack"
 "kitchenbench/place_in_rack" = "kitchenbench.tasks:place_in_rack"
@@ -56,10 +56,10 @@ roboinspect = { git = "https://github.com/robocurve/roboinspect", tag = "v0.2.0"
 "kitchenbench/sort_cutlery" = "kitchenbench.tasks:sort_cutlery"
 "kitchenbench/scoop_pasta" = "kitchenbench.tasks:scoop_pasta"
 
-[project.entry-points."roboinspect.embodiments"]
+[project.entry-points."inspect_robots.embodiments"]
 kitchen = "kitchenbench.embodiment:KitchenEmbodiment"
 
-[project.entry-points."roboinspect.policies"]
+[project.entry-points."inspect_robots.policies"]
 kitchen_scripted = "kitchenbench.policies:ScriptedKitchenPolicy"
 kitchen_random = "kitchenbench.policies:RandomKitchenPolicy"
 kitchen_noop = "kitchenbench.policies:NoopKitchenPolicy"
