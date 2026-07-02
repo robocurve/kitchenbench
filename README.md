@@ -225,6 +225,21 @@ uv run pytest --cov                        # 100% coverage required
 uv run ruff check . && uv run mypy
 ```
 
+## Citation
+
+If you use KitchenBench in your research, please cite it:
+
+```bibtex
+@software{kitchenbench,
+  author  = {Robocurve},
+  title   = {KitchenBench: A bimanual kitchen-manipulation benchmark for VLA models},
+  year    = {2026},
+  url     = {https://github.com/robocurve/kitchenbench},
+  version = {0.3.0},
+  license = {MIT}
+}
+```
+
 ## License
 
 [MIT](LICENSE)
