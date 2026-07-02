@@ -3,9 +3,9 @@ task_success is the instance success probability P̂[Yᵢ=1]."""
 
 from __future__ import annotations
 
-from roboinspect import eval as rl_eval
-from roboinspect.logging.sink import NullSink
-from roboinspect.rollout import TrialRecord
+from inspect_robots import eval as rl_eval
+from inspect_robots.logging.sink import NullSink
+from inspect_robots.rollout import TrialRecord
 
 from kitchenbench.tasks import realize_scene
 
@@ -51,7 +51,7 @@ def test_failing_policy_scores_zero_probability() -> None:
 
 def test_realize_scene_is_the_run_seam() -> None:
     # Sanity: the helper a real embodiment uses produces brace-free instructions.
-    from roboinspect.registry import resolve
+    from inspect_robots.registry import resolve
 
     task = resolve("task", "kitchenbench/pour_pasta")
     for scene in task.scenes:

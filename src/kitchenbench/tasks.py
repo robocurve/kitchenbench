@@ -1,12 +1,12 @@
 """The 10 KitchenBench tasks, generated from :data:`kitchenbench.specs.SPECS`.
 
-Each task instance (a stochastic setup + goal) becomes one RoboInspect ``Scene``;
+Each task instance (a stochastic setup + goal) becomes one Inspect Robots ``Scene``;
 each task runs ``K_REALIZATIONS`` (5) realizations per instance via
 ``Epochs(count=5, reducer="mean")``, so the per-scene reduced ``task_success`` is
 the methodology's instance success probability P̂[Yᵢ=1]. With ``K_INSTANCES`` (5)
 instances per task that is 5 scenes x 5 epochs per task.
 
-Each task is registered with RoboInspect under ``kitchenbench/<key>`` (the slash
+Each task is registered with Inspect Robots under ``kitchenbench/<key>`` (the slash
 namespaces KitchenBench within WorldEvals). The entry-point name, the ``@task``
 name, and the returned ``Task.name`` are all identical.
 """
@@ -17,8 +17,8 @@ import re
 from dataclasses import asdict
 from typing import Any
 
-from roboinspect import Epochs, Scene, Target, Task, episode_length, task
-from roboinspect.rollout import derive_seed
+from inspect_robots import Epochs, Scene, Target, Task, episode_length, task
+from inspect_robots.rollout import derive_seed
 
 from kitchenbench.instances import K_INSTANCES, K_REALIZATIONS, Realization
 from kitchenbench.scoring import task_success
@@ -79,7 +79,7 @@ def realize_scene(scene: Scene, seed: int | None) -> Realization:
 
 
 def make_task(spec: TaskSpec) -> Task:
-    """Assemble a RoboInspect :class:`~roboinspect.Task` from a :class:`TaskSpec`."""
+    """Assemble a Inspect Robots :class:`~inspect_robots.Task` from a :class:`TaskSpec`."""
     return Task(
         name=f"kitchenbench/{spec.key}",
         scenes=build_scenes(spec),

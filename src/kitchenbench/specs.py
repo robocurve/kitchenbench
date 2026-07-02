@@ -3,7 +3,7 @@
 Each :class:`TaskSpec` carries exactly ``K_INSTANCES`` (5) :class:`TaskInstance`\\ s
 (see :mod:`kitchenbench.instances`): self-contained scenarios whose environment
 setups are **distributions**. :mod:`kitchenbench.tasks` turns each instance into a
-RoboInspect ``Scene`` and runs ``K_REALIZATIONS`` (5) realizations per instance.
+Inspect Robots ``Scene`` and runs ``K_REALIZATIONS`` (5) realizations per instance.
 
 Instances are AI-authored drafts (``Validation(source="opus-draft")``) and are
 **not yet human-validated** — the methodology requires K_EXPERTS=3 reviewers

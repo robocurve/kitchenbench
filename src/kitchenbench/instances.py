@@ -8,8 +8,8 @@ environment; the methodology runs ``K_REALIZATIONS`` realizations of each of
 ``K_INSTANCES`` instances per task and estimates the instance success probability
 as the mean binary outcome.
 
-This module is pure (no RoboInspect import); :mod:`kitchenbench.tasks` maps instances
-onto RoboInspect ``Scene``/``Epochs``.
+This module is pure (no Inspect Robots import); :mod:`kitchenbench.tasks` maps instances
+onto Inspect Robots ``Scene``/``Epochs``.
 """
 
 from __future__ import annotations

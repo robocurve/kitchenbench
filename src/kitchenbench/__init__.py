@@ -1,9 +1,9 @@
 """KitchenBench — a bimanual kitchen-manipulation benchmark for VLA models.
 
-Built on `RoboInspect <https://github.com/robocurve/roboinspect>`_; the first member of
+Built on `Inspect Robots <https://github.com/robocurve/inspect-robots>`_; the first member of
 `WorldEvals <https://github.com/robocurve/worldevals>`_. Importing this package
 registers all 10 tasks, the mock :class:`~kitchenbench.embodiment.KitchenEmbodiment`,
-and the mock policies with the RoboInspect registry (they are also discoverable via
+and the mock policies with the Inspect Robots registry (they are also discoverable via
 entry points without importing).
 """
 
@@ -49,7 +49,7 @@ from kitchenbench.tasks import (
     stack,
 )
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "K_EXPERTS",
