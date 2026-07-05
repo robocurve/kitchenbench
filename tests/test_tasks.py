@@ -84,6 +84,14 @@ def test_realize_scene_fails_loudly_on_unknown_instance_id() -> None:
         realize_scene(stale, 0)
 
 
+def test_scene_ids_globally_unique() -> None:
+    # Scene ids must be unique across the whole benchmark, not just within a
+    # task — logs from different tasks are keyed by scene_id.
+    ids = [scene.id for spec in SPECS for scene in build_scenes(spec)]
+    assert len(ids) == 50
+    assert len(ids) == len(set(ids))
+
+
 def test_build_scenes_slugifies_ids() -> None:
     scenes = build_scenes(SPEC_BY_KEY["scoop_pasta"])
     assert any("measuring-cup" in s.id for s in scenes)

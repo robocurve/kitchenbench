@@ -50,6 +50,14 @@ def test_categorical_weighted_branch() -> None:
     assert draws == {"c"}
 
 
+def test_categorical_describe_includes_weights() -> None:
+    # Weighted categoricals must be distinguishable from uniform ones in logged
+    # setup_spec() strings.
+    assert Categorical(("bowl", "cup")).describe() == "Categorical({bowl, cup})"
+    d = Categorical(("bowl", "cup"), weights=(0.7, 0.3))
+    assert d.describe() == "Categorical({bowl, cup}; weights=[0.7, 0.3])"
+
+
 def test_categorical_variation_over_batch() -> None:
     d = Categorical(("bowl", "cup", "pot"))
     draws = {d.sample(_rng(s)) for s in range(20)}

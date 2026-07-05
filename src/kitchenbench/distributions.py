@@ -20,7 +20,7 @@ scalar) so realizations are JSON-native and mypy-strict clean.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 import numpy as np
 
@@ -31,7 +31,7 @@ Scalar = float | int | str
 class Distribution(Protocol):
     """A sampleable, self-describing setup variable."""
 
-    def sample(self, rng: np.random.Generator) -> Any: ...
+    def sample(self, rng: np.random.Generator) -> Scalar: ...
 
     def describe(self) -> str: ...
 
@@ -85,7 +85,10 @@ class Categorical:
 
     def describe(self) -> str:
         body = ", ".join(_num(v) if isinstance(v, int | float) else str(v) for v in self.values)
-        return f"Categorical({{{body}}})"
+        if self.weights is None:
+            return f"Categorical({{{body}}})"
+        wbody = ", ".join(_num(w) for w in self.weights)
+        return f"Categorical({{{body}}}; weights=[{wbody}])"
 
 
 @dataclass(frozen=True)
