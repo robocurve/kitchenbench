@@ -32,7 +32,6 @@ from inspect_robots import (
 )
 from inspect_robots.embodiment import PRIVILEGED_SUCCESS, RENDERABLE, SEEDABLE
 
-from kitchenbench.specs import SPEC_BY_KEY
 from kitchenbench.tasks import realize_scene
 
 _IMG = 24
@@ -63,6 +62,7 @@ class KitchenEmbodiment:
         self._progress = 0.0
         self._goal = np.zeros(6, dtype=np.float64)
         self._last = np.zeros(8, dtype=np.float64)
+        self._instruction: str | None = None
         self._rng = np.random.RandomState(0)
 
         self.info = EmbodimentInfo(
@@ -84,14 +84,17 @@ class KitchenEmbodiment:
         self._progress = 0.0
         self._last = np.zeros(8, dtype=np.float64)
         self.num_steps = 0
-        # For a KitchenBench scene, realize the task instance for this seed so the
-        # observed instruction reflects the per-epoch realization (a real embodiment
-        # / operator would also arrange the sampled setup). The realization rng is
+        # For a KitchenBench scene (the "benchmark" marker keeps scenes from other
+        # plugins out), realize the task instance for this seed so the observed
+        # instruction reflects the per-epoch realization (a real embodiment /
+        # operator would also arrange the sampled setup). The realization rng is
         # independent of the goal_dir rng above. Bare scenes fall back unchanged.
-        instruction = scene.instruction
-        if scene.metadata.get("task") in SPEC_BY_KEY:
-            instruction = realize_scene(scene, seed).instruction
-        return self._observe(instruction)
+        # The instruction is carried on every subsequent observation — real VLA
+        # policies re-condition on it at each act() call.
+        self._instruction = scene.instruction
+        if scene.metadata.get("benchmark") == "kitchenbench":
+            self._instruction = realize_scene(scene, seed).instruction
+        return self._observe()
 
     def step(self, action: Action) -> StepResult:
         self.num_steps += 1
@@ -105,7 +108,7 @@ class KitchenEmbodiment:
                 self._progress = min(self.goal_threshold, self._progress + self.step_size)
         success = self._progress >= self.goal_threshold
         return StepResult(
-            observation=self._observe(None),
+            observation=self._observe(),
             reward=self._progress - 1.0,
             terminated=success,
             termination_reason="success" if success else None,
@@ -116,7 +119,7 @@ class KitchenEmbodiment:
     def close(self) -> None:
         return None
 
-    def _observe(self, instruction: str | None) -> Observation:
+    def _observe(self) -> Observation:
         return Observation(
             images={"overhead": self._render()},
             state={
@@ -125,7 +128,7 @@ class KitchenEmbodiment:
                 "left_eef": self._last[:3].copy(),
                 "right_eef": self._last[3:6].copy(),
             },
-            instruction=instruction,
+            instruction=self._instruction,
         )
 
     def _render(self) -> np.ndarray:

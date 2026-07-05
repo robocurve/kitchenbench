@@ -66,6 +66,16 @@ def test_categorical_rejects_mismatched_weights() -> None:
         Categorical(("a", "b"), weights=(1.0,))
 
 
+def test_categorical_rejects_negative_weights() -> None:
+    with pytest.raises(ValueError, match="non-negative"):
+        Categorical(("a", "b"), weights=(1.0, -0.5))
+
+
+def test_categorical_rejects_zero_sum_weights() -> None:
+    with pytest.raises(ValueError, match="positive"):
+        Categorical(("a", "b"), weights=(0.0, 0.0))
+
+
 def test_normal_builtin_float_and_describe() -> None:
     d = Normal(0.0, 3.0)
     v = d.sample(_rng(0))

@@ -13,7 +13,8 @@ from dataclasses import dataclass
 
 from inspect_robots import Score, Scorer, Target, TrialRecord
 
-# Affirmative operator verdicts (case-insensitive), for real-world runs.
+# Affirmative operator verdicts (case-insensitive), for real-world runs. Mirrors
+# inspect_robots.scorer._OPERATOR_SUCCESS (private there) — keep the two in sync.
 _AFFIRMATIVE = frozenset({"success", "pass", "yes", "y", "1", "true"})
 
 

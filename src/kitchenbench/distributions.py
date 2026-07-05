@@ -38,7 +38,11 @@ class Distribution(Protocol):
 
 @dataclass(frozen=True)
 class Uniform:
-    """Continuous uniform on ``[low, high]``."""
+    """Continuous uniform on ``[low, high]``.
+
+    Sampling follows numpy's half-open convention (``high`` itself has probability
+    zero); ``describe()`` keeps the methodology's closed-interval notation.
+    """
 
     low: float
     high: float
@@ -64,8 +68,13 @@ class Categorical:
     def __post_init__(self) -> None:
         if not self.values:
             raise ValueError("Categorical needs at least one value")
-        if self.weights is not None and len(self.weights) != len(self.values):
-            raise ValueError("weights must match values in length")
+        if self.weights is not None:
+            if len(self.weights) != len(self.values):
+                raise ValueError("weights must match values in length")
+            if any(w < 0 for w in self.weights):
+                raise ValueError("weights must be non-negative")
+            if sum(self.weights) <= 0:
+                raise ValueError("weights must sum to a positive value")
 
     def sample(self, rng: np.random.Generator) -> Scalar:
         probs = None if self.weights is None else np.asarray(self.weights, dtype=np.float64)
