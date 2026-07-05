@@ -1,5 +1,10 @@
 # KitchenBench — design
 
+> **Superseded:** the task model here is superseded by
+> [0002 — task instances + distributions](0002-task-instances-distributions.md),
+> and the framework has since been renamed from RoboInspect to
+> [Inspect Robots](https://github.com/robocurve/inspect-robots). Kept for history.
+
 > **KitchenBench** is a bimanual kitchen-manipulation benchmark for VLA models,
 > built on [RoboInspect](https://github.com/robocurve/roboinspect). It is a *standalone
 > plugin repo* (the first member of [WorldEvals](https://github.com/robocurve/worldevals),
