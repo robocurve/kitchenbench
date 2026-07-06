@@ -2,9 +2,11 @@
 
 Built on `Inspect Robots <https://github.com/robocurve/inspect-robots>`_; the first member of
 `WorldEvals <https://github.com/robocurve/worldevals>`_. Importing this package
-registers all 10 tasks, the mock :class:`~kitchenbench.embodiment.KitchenEmbodiment`,
-and the mock policies with the Inspect Robots registry (they are also discoverable via
-entry points without importing).
+registers all 10 tasks with the Inspect Robots registry (via the ``@task``
+decorator). The mock :class:`~kitchenbench.embodiment.KitchenEmbodiment` and the
+mock policies are not registered on import — Inspect Robots resolves them through
+this package's entry points when it is installed (as it does the tasks, so no
+import is needed for ``inspect-robots list``).
 """
 
 from __future__ import annotations

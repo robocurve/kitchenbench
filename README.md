@@ -29,7 +29,7 @@ designed to point straight at real hardware — e.g. **YAM bimanual arms** drive
 | Task (`--task`) | Goal | Bimanual | Category |
 |---|---|:--:|---|
 | `kitchenbench/place_cutlery` | place the {cutlery} on the {dishware} | | pick-place |
-| `kitchenbench/stack` | stack the {items} | | stacking |
+| `kitchenbench/stack` | stack the cups / bowls / plates | | stacking |
 | `kitchenbench/place_in_rack` | place the {dishware} into the dish rack | | insertion |
 | `kitchenbench/pour_pasta` | pour the dry pasta into the {vessel} | ✅ | granular |
 | `kitchenbench/open_container` | open the {container} | ✅ | articulated |
@@ -158,7 +158,7 @@ category samples back as an `int`).
 
 ```bash
 # Inspect Robots isn't on PyPI yet, so install both from GitHub (uv recommended):
-uv pip install "inspect-robots @ git+https://github.com/robocurve/inspect-robots@v0.1.0"
+uv pip install "inspect-robots @ git+https://github.com/robocurve/inspect-robots@v0.3.0"
 uv pip install "kitchenbench @ git+https://github.com/robocurve/kitchenbench"
 ```
 
@@ -219,7 +219,7 @@ camera/state keys) before any motion and writes an immutable `EvalLog`.
 ## Development
 
 ```bash
-uv venv && uv pip install -e ".[dev]"     # inspect_robots resolved from the v0.1.0 tag
+uv venv && uv pip install -e ".[dev]"     # inspect_robots resolved from the v0.3.0 tag
 uv run pre-commit install
 uv run pytest --cov                        # 100% coverage required
 uv run ruff check . && uv run mypy

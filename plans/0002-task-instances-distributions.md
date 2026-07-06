@@ -1,4 +1,9 @@
-# 0001 — KitchenBench tasks as distributions (task instances + realizations)
+# 0002 — KitchenBench tasks as distributions (task instances + realizations)
+
+> **Note (historical document):** this plan predates the framework rename — it
+> refers to the framework as "RoboInspect" (`roboinspect`), which is now
+> [Inspect Robots](https://github.com/robocurve/inspect-robots) (`inspect_robots`).
+> The body is kept as written.
 
 **Status:** design + implementation plan (rev 2 — addresses critique round 1)
 **Goal:** adopt the *task-instance* model from the
