@@ -20,7 +20,7 @@ scalar) so realizations are JSON-native and mypy-strict clean.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 import numpy as np
 
@@ -31,14 +31,18 @@ Scalar = float | int | str
 class Distribution(Protocol):
     """A sampleable, self-describing setup variable."""
 
-    def sample(self, rng: np.random.Generator) -> Any: ...
+    def sample(self, rng: np.random.Generator) -> Scalar: ...
 
     def describe(self) -> str: ...
 
 
 @dataclass(frozen=True)
 class Uniform:
-    """Continuous uniform on ``[low, high]``."""
+    """Continuous uniform on ``[low, high]``.
+
+    Sampling follows numpy's half-open convention (``high`` itself has probability
+    zero); ``describe()`` keeps the methodology's closed-interval notation.
+    """
 
     low: float
     high: float
@@ -64,8 +68,13 @@ class Categorical:
     def __post_init__(self) -> None:
         if not self.values:
             raise ValueError("Categorical needs at least one value")
-        if self.weights is not None and len(self.weights) != len(self.values):
-            raise ValueError("weights must match values in length")
+        if self.weights is not None:
+            if len(self.weights) != len(self.values):
+                raise ValueError("weights must match values in length")
+            if any(w < 0 for w in self.weights):
+                raise ValueError("weights must be non-negative")
+            if sum(self.weights) <= 0:
+                raise ValueError("weights must sum to a positive value")
 
     def sample(self, rng: np.random.Generator) -> Scalar:
         probs = None if self.weights is None else np.asarray(self.weights, dtype=np.float64)
@@ -76,7 +85,10 @@ class Categorical:
 
     def describe(self) -> str:
         body = ", ".join(_num(v) if isinstance(v, int | float) else str(v) for v in self.values)
-        return f"Categorical({{{body}}})"
+        if self.weights is None:
+            return f"Categorical({{{body}}})"
+        wbody = ", ".join(_num(w) for w in self.weights)
+        return f"Categorical({{{body}}}; weights=[{wbody}])"
 
 
 @dataclass(frozen=True)

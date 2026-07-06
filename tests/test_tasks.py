@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from importlib.metadata import entry_points
 
 import pytest
@@ -45,6 +46,7 @@ def test_task_shape(spec: TaskSpec) -> None:
 def test_scene_metadata_is_json_native() -> None:
     scene = build_scenes(SPEC_BY_KEY["pour_pasta"])[0]
     json.dumps(dict(scene.metadata))  # must not raise
+    assert scene.metadata["benchmark"] == "kitchenbench"
     assert scene.metadata["task"] == "pour_pasta"
     assert scene.metadata["setup"]["vessel"].startswith("Categorical(")
     assert scene.metadata["validation"]["source"] == "opus-draft"
@@ -71,6 +73,23 @@ def test_realize_scene_recovers_and_guards_none() -> None:
     r = realize_scene(scene, 123)
     assert r.values["vessel"] in ("bowl", "cup", "pot")
     assert realize_scene(scene, None) == realize_scene(scene, 0)  # None -> 0
+
+
+def test_realize_scene_fails_loudly_on_unknown_instance_id() -> None:
+    # A scene logged under a removed/renamed instance must not silently realize a
+    # different one — recovery is by instance_id, not position.
+    scene = build_scenes(SPEC_BY_KEY["pour_pasta"])[0]
+    stale = replace(scene, metadata={**scene.metadata, "instance_id": "pour_pasta/retired"})
+    with pytest.raises(LookupError, match="pour_pasta/retired"):
+        realize_scene(stale, 0)
+
+
+def test_scene_ids_globally_unique() -> None:
+    # Scene ids must be unique across the whole benchmark, not just within a
+    # task — logs from different tasks are keyed by scene_id.
+    ids = [scene.id for spec in SPECS for scene in build_scenes(spec)]
+    assert len(ids) == 50
+    assert len(ids) == len(set(ids))
 
 
 def test_build_scenes_slugifies_ids() -> None:

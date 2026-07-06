@@ -38,6 +38,26 @@ def test_task_success_branches() -> None:
     assert scorer(_record(), None).value is False
 
 
+@pytest.mark.parametrize(
+    "verdict",
+    ["yes", "y", "1", "true", "YES", "True", "  y  ", "\tyes\n", " PASS "],
+)
+def test_task_success_accepts_affirmative_operator_variants(verdict: str) -> None:
+    # Real-world runs record free-form operator verdicts; every affirmative
+    # variant must count, case-insensitively and whitespace-tolerantly.
+    assert task_success()(_record(operator=verdict), None).value is True
+
+
+def test_affirmative_verdicts_match_framework_semantics() -> None:
+    # scoring._AFFIRMATIVE mirrors the framework's (private) operator-success
+    # set — this guard fails loudly if the two ever drift apart.
+    from inspect_robots.scorer import _OPERATOR_SUCCESS
+
+    from kitchenbench.scoring import _AFFIRMATIVE
+
+    assert _AFFIRMATIVE == _OPERATOR_SUCCESS
+
+
 # --------------------------------------------------------------------------- #
 # embodiment
 # --------------------------------------------------------------------------- #
@@ -70,6 +90,16 @@ def test_embodiment_zero_and_misaligned_actions_make_no_progress() -> None:
     opposite = Action(data=np.concatenate([-obs.state["goal_dir"], [0.0, 0.0]]))
     assert emb.step(opposite).info["progress"] == 0.0
     assert not emb.step(opposite).terminated
+
+
+def test_embodiment_instruction_persists_across_steps() -> None:
+    # Real VLA policies re-condition on the instruction at every act() call, so
+    # step observations must carry it, not just the reset observation.
+    emb = KitchenEmbodiment()
+    obs = emb.reset(_SCENE, seed=0)
+    assert obs.instruction == "do the thing"
+    result = emb.step(Action(data=np.zeros(8)))
+    assert result.observation.instruction == "do the thing"
 
 
 def test_embodiment_close_and_render_bar() -> None:

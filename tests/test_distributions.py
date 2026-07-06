@@ -50,6 +50,14 @@ def test_categorical_weighted_branch() -> None:
     assert draws == {"c"}
 
 
+def test_categorical_describe_includes_weights() -> None:
+    # Weighted categoricals must be distinguishable from uniform ones in logged
+    # setup_spec() strings.
+    assert Categorical(("bowl", "cup")).describe() == "Categorical({bowl, cup})"
+    d = Categorical(("bowl", "cup"), weights=(0.7, 0.3))
+    assert d.describe() == "Categorical({bowl, cup}; weights=[0.7, 0.3])"
+
+
 def test_categorical_variation_over_batch() -> None:
     d = Categorical(("bowl", "cup", "pot"))
     draws = {d.sample(_rng(s)) for s in range(20)}
@@ -64,6 +72,16 @@ def test_categorical_rejects_empty() -> None:
 def test_categorical_rejects_mismatched_weights() -> None:
     with pytest.raises(ValueError, match="match values"):
         Categorical(("a", "b"), weights=(1.0,))
+
+
+def test_categorical_rejects_negative_weights() -> None:
+    with pytest.raises(ValueError, match="non-negative"):
+        Categorical(("a", "b"), weights=(1.0, -0.5))
+
+
+def test_categorical_rejects_zero_sum_weights() -> None:
+    with pytest.raises(ValueError, match="positive"):
+        Categorical(("a", "b"), weights=(0.0, 0.0))
 
 
 def test_normal_builtin_float_and_describe() -> None:
