@@ -283,12 +283,16 @@ def test_handoff_left_to_right_transfer() -> None:
     assert not checker(held_left).success  # establishes holder=left
     mid_transfer = FakeWorld(
         {
-            "cup": _box(0.0, 0, 0.2, 0.09, 0.09, 0.10),
+            # Item already nearer the receiving hand, but the giver still
+            # grips it (both within GRASP_RADIUS_M): must not fire yet.
+            "cup": _box(0.02, 0, 0.2, 0.09, 0.09, 0.10),
             "gripper_left": _box(-0.05, 0, 0.2, 0.06, 0.06, 0.12),
             "gripper_right": _box(0.05, 0, 0.2, 0.06, 0.06, 0.12),
         }
     )
-    assert not checker(mid_transfer).success  # both hands on: must not fire
+    verdict = checker(mid_transfer)
+    assert not verdict.success
+    assert "mid-transfer" in verdict.explanation
     held_right = _grip_world(item_x=0.28)
     verdict = checker(held_right)
     assert verdict.success

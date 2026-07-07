@@ -5,6 +5,12 @@ Each :class:`TaskSpec` carries exactly ``K_INSTANCES`` (5) :class:`TaskInstance`
 setups are **distributions**. :mod:`kitchenbench.tasks` turns each instance into a
 Inspect Robots ``Scene`` and runs ``K_REALIZATIONS`` (5) realizations per instance.
 
+Every instance also carries an explicit ``sim=SimSpec(...)`` annotation (plan
+0003): the objects a simulator spawns (placements bound to this instance's setup
+variables), the roles the success checker needs, per-instance success parameters,
+and which variables are physical conditions. The coverage invariant is enforced
+at import time — see :func:`kitchenbench.instances._validate_sim_spec`.
+
 Instances are AI-authored drafts (``Validation(source="opus-draft")``) and are
 **not yet human-validated** — the methodology requires K_EXPERTS=3 reviewers
 (representativeness & quality >= 4) before the instances are trustworthy.
@@ -15,7 +21,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from kitchenbench.distributions import Categorical, Constant, Normal, Uniform
-from kitchenbench.instances import TaskInstance
+from kitchenbench.instances import SimObject, SimSpec, TaskInstance, Var
 
 
 @dataclass(frozen=True)
@@ -51,6 +57,23 @@ _PLACE_CUTLERY = (
         },
         language_vars=("cutlery", "dishware"),
         target_kind="place_on",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="cutlery",
+                    asset=Var("cutlery"),
+                    role="item",
+                    x_cm=Var("cutlery_x_cm"),
+                    y_cm=Var("jitter_y_cm"),
+                ),
+                SimObject(
+                    name="dishware",
+                    asset=Var("dishware"),
+                    role="surface",
+                    x_cm=Var("dishware_x_cm"),
+                ),
+            ),
+        ),
     ),
     TaskInstance(
         instance_id="place_cutlery/from-drawer",
@@ -63,6 +86,19 @@ _PLACE_CUTLERY = (
         },
         language_vars=("cutlery",),
         target_kind="place_on",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="cutlery", asset=Var("cutlery"), role="item", x_cm=-10.0),
+                SimObject(
+                    name="plate",
+                    asset="plate",
+                    role="surface",
+                    x_cm=Var("plate_x_cm"),
+                    y_cm=Var("plate_y_cm"),
+                ),
+            ),
+            conditions=("approach_angle_deg",),
+        ),
     ),
     TaskInstance(
         instance_id="place_cutlery/cluttered-bench",
@@ -75,6 +111,26 @@ _PLACE_CUTLERY = (
         },
         language_vars=("dishware",),
         target_kind="place_on",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="fork",
+                    asset="fork",
+                    role="item",
+                    x_cm=Var("fork_x_cm"),
+                    yaw_deg=Var("fork_yaw_deg"),
+                ),
+                SimObject(name="dishware", asset=Var("dishware"), role="surface", x_cm=10.0),
+                SimObject(
+                    name="distractor",
+                    asset="distractor",
+                    count=Var("distractor_count"),
+                    x_cm=0.0,
+                    y_cm=15.0,
+                    spread_cm=6.0,
+                ),
+            ),
+        ),
     ),
     TaskInstance(
         instance_id="place_cutlery/napkin-soft",
@@ -87,6 +143,19 @@ _PLACE_CUTLERY = (
         },
         language_vars=("cutlery",),
         target_kind="place_on",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="cutlery", asset=Var("cutlery"), role="item", x_cm=-10.0),
+                SimObject(
+                    name="napkin",
+                    asset="napkin",
+                    role="surface",
+                    x_cm=Var("napkin_x_cm"),
+                    y_cm=Var("napkin_y_cm"),
+                    yaw_deg=Var("napkin_rotation_deg"),
+                ),
+            ),
+        ),
     ),
     TaskInstance(
         instance_id="place_cutlery/far-reach",
@@ -99,6 +168,23 @@ _PLACE_CUTLERY = (
         },
         language_vars=("dishware",),
         target_kind="place_on",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="knife",
+                    asset="knife",
+                    role="item",
+                    x_cm=Var("knife_x_cm"),
+                    y_cm=Var("jitter_y_cm"),
+                ),
+                SimObject(
+                    name="dishware",
+                    asset=Var("dishware"),
+                    role="surface",
+                    x_cm=Var("dishware_x_cm"),
+                ),
+            ),
+        ),
     ),
 )
 
@@ -113,6 +199,19 @@ _STACK = (
             "jitter_y_cm": _jitter(2.0),
         },
         target_kind="stack",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="cup",
+                    asset="cup",
+                    role="stack",
+                    count=Var("count"),
+                    spread_cm=Var("spread_cm"),
+                    x_cm=Var("jitter_x_cm"),
+                    y_cm=Var("jitter_y_cm"),
+                ),
+            ),
+        ),
     ),
     TaskInstance(
         instance_id="stack/bowls",
@@ -123,6 +222,18 @@ _STACK = (
             "spread_cm": Uniform(8, 18),
         },
         target_kind="stack",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="bowl",
+                    asset="bowl",
+                    role="stack",
+                    count=Var("count"),
+                    spread_cm=Var("spread_cm"),
+                    size_cm=Var("diameter_cm"),
+                ),
+            ),
+        ),
     ),
     TaskInstance(
         instance_id="stack/plates",
@@ -133,6 +244,19 @@ _STACK = (
             "plate_y_cm": _jitter(3.0),
         },
         target_kind="stack",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="plate",
+                    asset="plate",
+                    role="stack",
+                    count=Var("count"),
+                    spread_cm=8.0,
+                    x_cm=Var("plate_x_cm"),
+                    y_cm=Var("plate_y_cm"),
+                ),
+            ),
+        ),
     ),
     TaskInstance(
         instance_id="stack/mixed-sizes",
@@ -143,6 +267,18 @@ _STACK = (
             "spread_cm": Uniform(10, 20),
         },
         target_kind="stack",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="bowl",
+                    asset="bowl",
+                    role="stack",
+                    count=Var("count"),
+                    spread_cm=Var("spread_cm"),
+                    size_order=Var("size_order"),
+                ),
+            ),
+        ),
     ),
     TaskInstance(
         instance_id="stack/tight-spacing",
@@ -153,6 +289,18 @@ _STACK = (
             "jitter_x_cm": _jitter(1.0),
         },
         target_kind="stack",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="cup",
+                    asset="cup",
+                    role="stack",
+                    count=Var("count"),
+                    spread_cm=Var("spread_cm"),
+                    x_cm=Var("jitter_x_cm"),
+                ),
+            ),
+        ),
     ),
 )
 
@@ -168,6 +316,19 @@ _PLACE_IN_RACK = (
         },
         language_vars=("dishware",),
         target_kind="place_in",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="dishware",
+                    asset=Var("dishware"),
+                    role="item",
+                    x_cm=-10.0,
+                    yaw_deg=Var("dishware_yaw_deg"),
+                ),
+                SimObject(name="rack", asset="dish_rack", role="rack", x_cm=Var("rack_x_cm")),
+            ),
+            conditions=("slot_index",),
+        ),
     ),
     TaskInstance(
         instance_id="place_in_rack/bowl-tilt",
@@ -178,6 +339,15 @@ _PLACE_IN_RACK = (
             "rack_y_cm": _jitter(2.0),
         },
         target_kind="place_in",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="bowl", asset="bowl", role="item", x_cm=-10.0),
+                SimObject(
+                    name="rack", asset="dish_rack", role="rack", x_cm=12.0, y_cm=Var("rack_y_cm")
+                ),
+            ),
+            conditions=("slot_index", "approach_tilt_deg"),
+        ),
     ),
     TaskInstance(
         instance_id="place_in_rack/cup-narrow",
@@ -188,6 +358,13 @@ _PLACE_IN_RACK = (
             "cup_x_cm": Uniform(-15, -5),
         },
         target_kind="place_in",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="cup", asset="cup", role="item", x_cm=Var("cup_x_cm")),
+                SimObject(name="rack", asset="dish_rack", role="rack", x_cm=12.0),
+            ),
+            conditions=("slot_index", "slot_width_cm"),
+        ),
     ),
     TaskInstance(
         instance_id="place_in_rack/rightmost-slot",
@@ -199,6 +376,13 @@ _PLACE_IN_RACK = (
         },
         language_vars=("dishware",),
         target_kind="place_in",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="dishware", asset=Var("dishware"), role="item", x_cm=-10.0),
+                SimObject(name="rack", asset="dish_rack", role="rack", x_cm=Var("rack_x_cm")),
+            ),
+            conditions=("slot_index",),
+        ),
     ),
     TaskInstance(
         instance_id="place_in_rack/wet-slippery",
@@ -209,6 +393,13 @@ _PLACE_IN_RACK = (
             "plate_x_cm": Normal(-10.0, 2.0),
         },
         target_kind="place_in",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="plate", asset="plate", role="item", x_cm=Var("plate_x_cm")),
+                SimObject(name="rack", asset="dish_rack", role="rack", x_cm=12.0),
+            ),
+            conditions=("slot_index", "surface_friction"),
+        ),
     ),
 )
 
@@ -226,6 +417,27 @@ _POUR_PASTA = (
         language_vars=("vessel",),
         target_kind="pour_into",
         static={"substance": "dry_pasta"},
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="vessel",
+                    asset=Var("vessel"),
+                    role="vessel",
+                    x_cm=Var("vessel_x_cm"),
+                    y_cm=Var("vessel_y_cm"),
+                ),
+                SimObject(name="source", asset="measuring_cup", role="source", x_cm=-12.0),
+                SimObject(
+                    name="pasta",
+                    asset=Var("substance"),
+                    role="substance",
+                    parent="source",
+                    amount_g=Var("fill_g"),
+                ),
+            ),
+            success=(("substance", "pasta"), ("total_g", Var("fill_g"))),
+            conditions=("pour_height_cm",),
+        ),
     ),
     TaskInstance(
         instance_id="pour_pasta/full-box",
@@ -237,6 +449,21 @@ _POUR_PASTA = (
         },
         target_kind="pour_into",
         static={"substance": "dry_pasta"},
+        sim=SimSpec(
+            objects=(
+                SimObject(name="pot", asset="pot", role="vessel", x_cm=Var("pot_x_cm")),
+                SimObject(name="source", asset="pasta_box", role="source", x_cm=-12.0),
+                SimObject(
+                    name="pasta",
+                    asset=Var("substance"),
+                    role="substance",
+                    parent="source",
+                    amount_g=Var("fill_g"),
+                ),
+            ),
+            success=(("substance", "pasta"), ("total_g", Var("fill_g"))),
+            conditions=("pour_angle_deg",),
+        ),
     ),
     TaskInstance(
         instance_id="pour_pasta/narrow-cup",
@@ -248,6 +475,27 @@ _POUR_PASTA = (
         },
         target_kind="pour_into",
         static={"substance": "dry_pasta"},
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="cup",
+                    asset="cup",
+                    role="vessel",
+                    x_cm=10.0,
+                    size_cm=Var("cup_diameter_cm"),
+                ),
+                SimObject(name="source", asset="measuring_cup", role="source", x_cm=-12.0),
+                SimObject(
+                    name="pasta",
+                    asset=Var("substance"),
+                    role="substance",
+                    parent="source",
+                    amount_g=Var("fill_g"),
+                ),
+            ),
+            success=(("substance", "pasta"), ("total_g", Var("fill_g"))),
+            conditions=("pour_height_cm",),
+        ),
     ),
     TaskInstance(
         instance_id="pour_pasta/steady-and-pour",
@@ -261,6 +509,23 @@ _POUR_PASTA = (
         language_vars=("vessel",),
         target_kind="pour_into",
         static={"substance": "dry_pasta"},
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="vessel", asset=Var("vessel"), role="vessel", x_cm=Var("vessel_x_cm")
+                ),
+                SimObject(name="source", asset="pasta_box", role="source", x_cm=-12.0),
+                SimObject(
+                    name="pasta",
+                    asset=Var("substance"),
+                    role="substance",
+                    parent="source",
+                    amount_g=Var("fill_g"),
+                ),
+            ),
+            success=(("substance", "pasta"), ("total_g", Var("fill_g"))),
+            conditions=("steadying_force_n",),
+        ),
     ),
     TaskInstance(
         instance_id="pour_pasta/long-spaghetti",
@@ -272,6 +537,21 @@ _POUR_PASTA = (
         },
         target_kind="pour_into",
         static={"substance": "dry_pasta"},
+        sim=SimSpec(
+            objects=(
+                SimObject(name="pot", asset="pot", role="vessel", x_cm=8.0, y_cm=Var("pot_y_cm")),
+                SimObject(name="source", asset="pasta_box", role="source", x_cm=-12.0),
+                SimObject(
+                    name="pasta",
+                    asset=Var("substance"),
+                    role="substance",
+                    parent="source",
+                    amount_g=Var("fill_g"),
+                ),
+            ),
+            success=(("substance", "pasta"), ("total_g", Var("fill_g"))),
+            conditions=("strand_length_cm",),
+        ),
     ),
 )
 
@@ -287,6 +567,18 @@ _OPEN_CONTAINER = (
         },
         language_vars=("container",),
         target_kind="open",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="container",
+                    asset=Var("container"),
+                    role="container",
+                    x_cm=Var("container_x_cm"),
+                    yaw_deg=Var("container_yaw_deg"),
+                ),
+            ),
+            conditions=("lid_torque_nm",),
+        ),
     ),
     TaskInstance(
         instance_id="open_container/bottle-cap",
@@ -297,6 +589,12 @@ _OPEN_CONTAINER = (
             "bottle_x_cm": _jitter(2.0),
         },
         target_kind="open",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="bottle", asset="bottle", role="container", x_cm=Var("bottle_x_cm")),
+            ),
+            conditions=("cap_turns", "lid_torque_nm"),
+        ),
     ),
     TaskInstance(
         instance_id="open_container/snap-lid",
@@ -307,6 +605,17 @@ _OPEN_CONTAINER = (
             "container_y_cm": _jitter(2.5),
         },
         target_kind="open",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="container",
+                    asset="food_container",
+                    role="container",
+                    y_cm=Var("container_y_cm"),
+                ),
+            ),
+            conditions=("clip_count", "pry_force_n"),
+        ),
     ),
     TaskInstance(
         instance_id="open_container/stiff-jar",
@@ -317,6 +626,14 @@ _OPEN_CONTAINER = (
             "jar_diameter_cm": Categorical((6, 8, 10)),
         },
         target_kind="open",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="jar", asset="jar", role="container", size_cm=Var("jar_diameter_cm")
+                ),
+            ),
+            conditions=("lid_torque_nm", "brace_force_n"),
+        ),
     ),
     TaskInstance(
         instance_id="open_container/tilted",
@@ -328,6 +645,10 @@ _OPEN_CONTAINER = (
         },
         language_vars=("container",),
         target_kind="open",
+        sim=SimSpec(
+            objects=(SimObject(name="container", asset=Var("container"), role="container"),),
+            conditions=("tilt_deg", "lid_torque_nm"),
+        ),
     ),
 )
 
@@ -343,6 +664,18 @@ _FOLD_CLOTH = (
         },
         language_vars=("cloth",),
         target_kind="fold",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="cloth",
+                    asset=Var("cloth"),
+                    role="cloth",
+                    size_cm=Var("size_cm"),
+                    yaw_deg=Var("initial_rotation_deg"),
+                ),
+            ),
+            success=(("slack", Var("slack")),),
+        ),
     ),
     TaskInstance(
         instance_id="fold_cloth/napkin-half",
@@ -353,6 +686,18 @@ _FOLD_CLOTH = (
             "napkin_y_cm": _jitter(2.0),
         },
         target_kind="fold",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="napkin",
+                    asset="napkin",
+                    role="cloth",
+                    x_cm=Var("napkin_x_cm"),
+                    y_cm=Var("napkin_y_cm"),
+                ),
+            ),
+            success=(("fold_count", Var("fold_count")),),
+        ),
     ),
     TaskInstance(
         instance_id="fold_cloth/large-cloth",
@@ -363,6 +708,11 @@ _FOLD_CLOTH = (
             "corner_offset_cm": _jitter(4.0),
         },
         target_kind="fold",
+        sim=SimSpec(
+            objects=(SimObject(name="cloth", asset="cloth", role="cloth", size_cm=Var("size_cm")),),
+            success=(("slack", Var("slack")),),
+            conditions=("corner_offset_cm",),
+        ),
     ),
     TaskInstance(
         instance_id="fold_cloth/crumpled-start",
@@ -374,6 +724,18 @@ _FOLD_CLOTH = (
         },
         language_vars=("cloth",),
         target_kind="fold",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="cloth",
+                    asset=Var("cloth"),
+                    role="cloth",
+                    yaw_deg=Var("initial_rotation_deg"),
+                ),
+            ),
+            success=(("baseline", "nominal"),),
+            conditions=("crumple_level",),
+        ),
     ),
     TaskInstance(
         instance_id="fold_cloth/thirds",
@@ -384,6 +746,12 @@ _FOLD_CLOTH = (
             "slack": Uniform(0.0, 0.3),
         },
         target_kind="fold",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="towel", asset="dish_towel", role="cloth", size_cm=Var("size_cm")),
+            ),
+            success=(("fold_count", Var("fold_count")), ("slack", Var("slack"))),
+        ),
     ),
 )
 
@@ -399,6 +767,20 @@ _SEAL_CONTAINER = (
         },
         language_vars=("container",),
         target_kind="seal",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="container", asset=Var("container"), role="container"),
+                SimObject(
+                    name="lid",
+                    asset="lid",
+                    role="lid",
+                    parent="container",
+                    x_cm=Var("lid_offset_cm"),
+                    yaw_deg=Var("lid_yaw_deg"),
+                ),
+            ),
+            conditions=("press_force_n",),
+        ),
     ),
     TaskInstance(
         instance_id="seal_container/twist-lid-jar",
@@ -409,6 +791,13 @@ _SEAL_CONTAINER = (
             "jar_x_cm": Normal(0.0, 2.0),
         },
         target_kind="seal",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="jar", asset="jar", role="container", x_cm=Var("jar_x_cm")),
+                SimObject(name="lid", asset="lid", role="lid", parent="jar", x_cm=8.0),
+            ),
+            conditions=("thread_turns", "seat_torque_nm"),
+        ),
     ),
     TaskInstance(
         instance_id="seal_container/snap-on-pot",
@@ -419,6 +808,13 @@ _SEAL_CONTAINER = (
             "pot_y_cm": _jitter(2.5),
         },
         target_kind="seal",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="pot", asset="pot", role="container", y_cm=Var("pot_y_cm")),
+                SimObject(name="lid", asset="lid", role="lid", parent="pot", x_cm=10.0),
+            ),
+            conditions=("clip_count", "press_force_n"),
+        ),
     ),
     TaskInstance(
         instance_id="seal_container/misaligned-lid",
@@ -430,6 +826,19 @@ _SEAL_CONTAINER = (
         },
         language_vars=("container",),
         target_kind="seal",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="container", asset=Var("container"), role="container"),
+                SimObject(
+                    name="lid",
+                    asset="lid",
+                    role="lid",
+                    parent="container",
+                    x_cm=Var("lid_offset_cm"),
+                    yaw_deg=Var("lid_yaw_deg"),
+                ),
+            ),
+        ),
     ),
     TaskInstance(
         instance_id="seal_container/tight-fit",
@@ -440,6 +849,19 @@ _SEAL_CONTAINER = (
             "lid_offset_cm": _jitter(1.0),
         },
         target_kind="seal",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="container", asset="food_container", role="container"),
+                SimObject(
+                    name="lid",
+                    asset="lid",
+                    role="lid",
+                    parent="container",
+                    x_cm=Var("lid_offset_cm"),
+                ),
+            ),
+            conditions=("clearance_mm", "press_force_n"),
+        ),
     ),
 )
 
@@ -455,6 +877,19 @@ _HANDOFF = (
         },
         language_vars=("item",),
         target_kind="handoff",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="item",
+                    asset=Var("item"),
+                    role="item",
+                    x_cm=Var("pickup_x_cm"),
+                    yaw_deg=Var("item_yaw_deg"),
+                ),
+            ),
+            success=(("receiving_arm", "right"),),
+            conditions=("handoff_height_cm",),
+        ),
     ),
     TaskInstance(
         instance_id="handoff/cup-upright",
@@ -465,6 +900,11 @@ _HANDOFF = (
             "handoff_height_cm": Uniform(18, 28),
         },
         target_kind="handoff",
+        sim=SimSpec(
+            objects=(SimObject(name="cup", asset="cup", role="item", x_cm=Var("handoff_x_cm")),),
+            success=(("receiving_arm", "either"),),
+            conditions=("fill_level", "handoff_height_cm"),
+        ),
     ),
     TaskInstance(
         instance_id="handoff/produce-delicate",
@@ -475,6 +915,19 @@ _HANDOFF = (
             "pickup_y_cm": _jitter(2.0),
         },
         target_kind="handoff",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="item",
+                    asset="produce_item",
+                    role="item",
+                    x_cm=-15.0,
+                    y_cm=Var("pickup_y_cm"),
+                ),
+            ),
+            success=(("receiving_arm", "either"),),
+            conditions=("fragility", "grip_force_n"),
+        ),
     ),
     TaskInstance(
         instance_id="handoff/long-tool",
@@ -486,6 +939,19 @@ _HANDOFF = (
         },
         language_vars=("item",),
         target_kind="handoff",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="item",
+                    asset=Var("item"),
+                    role="item",
+                    x_cm=-15.0,
+                    size_cm=Var("length_cm"),
+                ),
+            ),
+            success=(("receiving_arm", "either"),),
+            conditions=("handoff_height_cm",),
+        ),
     ),
     TaskInstance(
         instance_id="handoff/cross-body",
@@ -496,8 +962,44 @@ _HANDOFF = (
             "handoff_height_cm": Uniform(20, 30),
         },
         target_kind="handoff",
+        sim=SimSpec(
+            objects=(SimObject(name="cup", asset="cup", role="item", x_cm=Var("pickup_x_cm")),),
+            success=(("receiving_arm", "left"),),
+            conditions=("release_x_cm", "handoff_height_cm"),
+        ),
     ),
 )
+
+
+def _sort_fixtures(
+    tray_x_cm: float | Var = 15.0, tray_yaw_deg: float | Var = 0.0
+) -> tuple[SimObject, ...]:
+    """The tray + its three labelled compartments shared by every sort instance."""
+    return (
+        SimObject(name="tray", asset="tray", role="tray", x_cm=tray_x_cm, yaw_deg=tray_yaw_deg),
+        SimObject(
+            name="compartment_spoon",
+            asset="compartment",
+            role="compartment",
+            parent="tray",
+            x_cm=-6.0,
+        ),
+        SimObject(
+            name="compartment_fork",
+            asset="compartment",
+            role="compartment",
+            parent="tray",
+            x_cm=0.0,
+        ),
+        SimObject(
+            name="compartment_knife",
+            asset="compartment",
+            role="compartment",
+            parent="tray",
+            x_cm=6.0,
+        ),
+    )
+
 
 _SORT_CUTLERY = (
     TaskInstance(
@@ -511,6 +1013,38 @@ _SORT_CUTLERY = (
         },
         target_kind="sort",
         static={"categories": "spoon,fork,knife"},
+        sim=SimSpec(
+            objects=(
+                *_sort_fixtures(),
+                SimObject(
+                    name="spoon",
+                    asset="spoon",
+                    role="sortable",
+                    count=Var("spoon_count"),
+                    x_cm=-20.0,
+                    y_cm=-6.0,
+                    spread_cm=Var("pile_spread_cm"),
+                ),
+                SimObject(
+                    name="fork",
+                    asset="fork",
+                    role="sortable",
+                    count=Var("fork_count"),
+                    x_cm=-20.0,
+                    y_cm=0.0,
+                    spread_cm=4.0,
+                ),
+                SimObject(
+                    name="knife",
+                    asset="knife",
+                    role="sortable",
+                    count=Var("knife_count"),
+                    x_cm=-20.0,
+                    y_cm=6.0,
+                    spread_cm=4.0,
+                ),
+            ),
+        ),
     ),
     TaskInstance(
         instance_id="sort_cutlery/spoon-heavy",
@@ -522,6 +1056,38 @@ _SORT_CUTLERY = (
         },
         target_kind="sort",
         static={"categories": "spoon,fork,knife"},
+        sim=SimSpec(
+            objects=(
+                *_sort_fixtures(),
+                SimObject(
+                    name="spoon",
+                    asset="spoon",
+                    role="sortable",
+                    count=Var("spoon_count"),
+                    x_cm=-20.0,
+                    y_cm=-6.0,
+                    spread_cm=4.0,
+                ),
+                SimObject(
+                    name="fork",
+                    asset="fork",
+                    role="sortable",
+                    count=Var("fork_count"),
+                    x_cm=-20.0,
+                    y_cm=0.0,
+                    spread_cm=4.0,
+                ),
+                SimObject(
+                    name="knife",
+                    asset="knife",
+                    role="sortable",
+                    count=Var("knife_count"),
+                    x_cm=-20.0,
+                    y_cm=6.0,
+                    spread_cm=4.0,
+                ),
+            ),
+        ),
     ),
     TaskInstance(
         instance_id="sort_cutlery/overlapping",
@@ -533,6 +1099,22 @@ _SORT_CUTLERY = (
         },
         target_kind="sort",
         static={"categories": "spoon,fork,knife"},
+        sim=SimSpec(
+            objects=(
+                *_sort_fixtures(),
+                SimObject(
+                    name="cutlery",
+                    asset="cutlery",
+                    role="sortable",
+                    count=Var("total_count"),
+                    split=("spoon", "fork", "knife"),
+                    x_cm=Var("pile_x_cm"),
+                    y_cm=-10.0,
+                    spread_cm=4.0,
+                ),
+            ),
+            conditions=("overlap_level",),
+        ),
     ),
     TaskInstance(
         instance_id="sort_cutlery/tray-offset",
@@ -544,6 +1126,21 @@ _SORT_CUTLERY = (
         },
         target_kind="sort",
         static={"categories": "spoon,fork,knife"},
+        sim=SimSpec(
+            objects=(
+                *_sort_fixtures(tray_x_cm=Var("tray_x_cm"), tray_yaw_deg=Var("tray_yaw_deg")),
+                SimObject(
+                    name="cutlery",
+                    asset="cutlery",
+                    role="sortable",
+                    count=Var("total_count"),
+                    split=("spoon", "fork", "knife"),
+                    x_cm=-20.0,
+                    y_cm=-10.0,
+                    spread_cm=4.0,
+                ),
+            ),
+        ),
     ),
     TaskInstance(
         instance_id="sort_cutlery/sparse",
@@ -556,13 +1153,48 @@ _SORT_CUTLERY = (
         },
         target_kind="sort",
         static={"categories": "spoon,fork,knife"},
+        sim=SimSpec(
+            objects=(
+                *_sort_fixtures(),
+                SimObject(
+                    name="spoon",
+                    asset="spoon",
+                    role="sortable",
+                    count=Var("spoon_count"),
+                    x_cm=-20.0,
+                    y_cm=-6.0,
+                    spread_cm=Var("pile_spread_cm"),
+                ),
+                SimObject(
+                    name="fork",
+                    asset="fork",
+                    role="sortable",
+                    count=Var("fork_count"),
+                    x_cm=-20.0,
+                    y_cm=0.0,
+                    spread_cm=4.0,
+                ),
+                SimObject(
+                    name="knife",
+                    asset="knife",
+                    role="sortable",
+                    count=Var("knife_count"),
+                    x_cm=-20.0,
+                    y_cm=6.0,
+                    spread_cm=4.0,
+                ),
+            ),
+        ),
     ),
 )
 
 _SCOOP_PASTA = (
     TaskInstance(
         instance_id="scoop_pasta/spoon-penne",
-        goal="scoop the {pasta} with the {tool} and transfer it to the container",
+        goal=(
+            "scoop about {fill_target_g:.0f} g of the {pasta} with the {tool} "
+            "and transfer it to the container"
+        ),
         setup={
             "pasta": Categorical(("penne", "rigatoni")),
             "tool": Categorical(("spoon", "measuring cup")),
@@ -570,50 +1202,133 @@ _SCOOP_PASTA = (
             "pile_x_cm": Normal(-8.0, 2.0),
             "container_x_cm": Uniform(8, 18),
         },
-        language_vars=("pasta", "tool"),
+        language_vars=("pasta", "tool", "fill_target_g"),
         target_kind="scoop_transfer",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="container",
+                    asset="container",
+                    role="container",
+                    x_cm=Var("container_x_cm"),
+                ),
+                SimObject(name="pile", asset=Var("pasta"), role="substance", x_cm=Var("pile_x_cm")),
+                SimObject(name="tool", asset=Var("tool"), role="tool", x_cm=-20.0, y_cm=10.0),
+            ),
+            success=(("substance", "pile"), ("target_g", Var("fill_target_g"))),
+        ),
     ),
     TaskInstance(
         instance_id="scoop_pasta/measuring-cup-level",
-        goal="scoop the penne with the measuring cup and transfer it to the container",
+        goal=(
+            "scoop about {fill_target_g:.0f} g of the penne with the measuring cup "
+            "and transfer it to the container"
+        ),
         setup={
             "fill_target_g": Uniform(80, 160),
             "level_tolerance_g": Categorical((5, 10)),
             "pile_y_cm": _jitter(2.0),
         },
+        language_vars=("fill_target_g",),
         target_kind="scoop_transfer",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="container", asset="container", role="container", x_cm=12.0),
+                SimObject(
+                    name="pile", asset="penne", role="substance", x_cm=-8.0, y_cm=Var("pile_y_cm")
+                ),
+                SimObject(name="tool", asset="measuring_cup", role="tool", x_cm=-20.0, y_cm=10.0),
+            ),
+            success=(
+                ("substance", "pile"),
+                ("target_g", Var("fill_target_g")),
+                ("tol_g", Var("level_tolerance_g")),
+            ),
+        ),
     ),
     TaskInstance(
         instance_id="scoop_pasta/rigatoni-large",
-        goal="scoop the rigatoni with the {tool} and transfer it to the container",
+        goal=(
+            "scoop about {fill_target_g:.0f} g of the rigatoni with the {tool} "
+            "and transfer it to the container"
+        ),
         setup={
             "tool": Categorical(("spoon", "measuring cup")),
             "fill_target_g": Uniform(40, 100),
             "pile_depth_cm": Categorical((3, 5, 7)),
         },
-        language_vars=("tool",),
+        language_vars=("tool", "fill_target_g"),
         target_kind="scoop_transfer",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="container", asset="container", role="container", x_cm=12.0),
+                SimObject(
+                    name="pile",
+                    asset="rigatoni",
+                    role="substance",
+                    x_cm=-8.0,
+                    size_cm=Var("pile_depth_cm"),
+                ),
+                SimObject(name="tool", asset=Var("tool"), role="tool", x_cm=-20.0, y_cm=10.0),
+            ),
+            success=(("substance", "pile"), ("target_g", Var("fill_target_g"))),
+        ),
     ),
     TaskInstance(
         instance_id="scoop_pasta/shallow-pile",
-        goal="scoop the {pasta} with the spoon and transfer it to the container",
+        goal=(
+            "scoop about {fill_target_g:.0f} g of the {pasta} with the spoon "
+            "and transfer it to the container"
+        ),
         setup={
             "pasta": Categorical(("penne", "rigatoni")),
             "pile_depth_cm": Categorical((1, 2)),
             "fill_target_g": Uniform(20, 60),
         },
-        language_vars=("pasta",),
+        language_vars=("pasta", "fill_target_g"),
         target_kind="scoop_transfer",
+        sim=SimSpec(
+            objects=(
+                SimObject(name="container", asset="container", role="container", x_cm=12.0),
+                SimObject(
+                    name="pile",
+                    asset=Var("pasta"),
+                    role="substance",
+                    x_cm=-8.0,
+                    size_cm=Var("pile_depth_cm"),
+                ),
+                SimObject(name="tool", asset="spoon", role="tool", x_cm=-20.0, y_cm=10.0),
+            ),
+            success=(("substance", "pile"), ("target_g", Var("fill_target_g"))),
+        ),
     ),
     TaskInstance(
         instance_id="scoop_pasta/far-container",
-        goal="scoop the penne with the measuring cup and transfer it to the container",
+        goal=(
+            "scoop about {fill_target_g:.0f} g of the penne with the measuring cup "
+            "and transfer it to the container"
+        ),
         setup={
             "container_x_cm": Uniform(20, 32),
             "fill_target_g": Uniform(60, 140),
             "transfer_height_cm": Uniform(10, 20),
         },
+        language_vars=("fill_target_g",),
         target_kind="scoop_transfer",
+        sim=SimSpec(
+            objects=(
+                SimObject(
+                    name="container",
+                    asset="container",
+                    role="container",
+                    x_cm=Var("container_x_cm"),
+                ),
+                SimObject(name="pile", asset="penne", role="substance", x_cm=-8.0),
+                SimObject(name="tool", asset="measuring_cup", role="tool", x_cm=-20.0, y_cm=10.0),
+            ),
+            success=(("substance", "pile"), ("target_g", Var("fill_target_g"))),
+            conditions=("transfer_height_cm",),
+        ),
     ),
 )
 
@@ -707,6 +1422,7 @@ SPECS: tuple[TaskSpec, ...] = (
         bimanual=True,
         max_steps=120,
         instances=_SCOOP_PASTA,
+        version="2",
         description="Tool-mediated granular handling: manage fill level, then transfer.",
     ),
 )

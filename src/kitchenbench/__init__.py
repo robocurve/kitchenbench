@@ -24,8 +24,11 @@ from kitchenbench.instances import (
     K_INSTANCES,
     K_REALIZATIONS,
     Realization,
+    SimObject,
+    SimSpec,
     TaskInstance,
     Validation,
+    Var,
 )
 from kitchenbench.policies import (
     NoopKitchenPolicy,
@@ -33,6 +36,17 @@ from kitchenbench.policies import (
     ScriptedKitchenPolicy,
 )
 from kitchenbench.scoring import task_success
+from kitchenbench.sim import (
+    ASSETS,
+    SIM_CONTRACT_VERSION,
+    AssetSpec,
+    SceneBlueprint,
+    SceneObject,
+    Verdict,
+    WorldState,
+    build_blueprint,
+    make_success_checker,
+)
 from kitchenbench.specs import SPEC_BY_KEY, SPECS, TaskSpec
 from kitchenbench.tasks import (
     TASK_FACTORIES,
@@ -60,12 +74,15 @@ except PackageNotFoundError:  # pragma: no cover - only hit in a non-installed t
     __version__ = "0.0.0+unknown"
 
 __all__ = [
+    "ASSETS",
     "K_EXPERTS",
     "K_INSTANCES",
     "K_REALIZATIONS",
+    "SIM_CONTRACT_VERSION",
     "SPECS",
     "SPEC_BY_KEY",
     "TASK_FACTORIES",
+    "AssetSpec",
     "Categorical",
     "Constant",
     "Distribution",
@@ -74,15 +91,24 @@ __all__ = [
     "Normal",
     "RandomKitchenPolicy",
     "Realization",
+    "SceneBlueprint",
+    "SceneObject",
     "ScriptedKitchenPolicy",
+    "SimObject",
+    "SimSpec",
     "TaskInstance",
     "TaskSpec",
     "Uniform",
     "Validation",
+    "Var",
+    "Verdict",
+    "WorldState",
     "__version__",
+    "build_blueprint",
     "build_scenes",
     "fold_cloth",
     "handoff",
+    "make_success_checker",
     "make_task",
     "open_container",
     "place_cutlery",

@@ -216,6 +216,36 @@ inspect-robots run --task kitchenbench/pour_pasta --policy molmoact2 --embodimen
 Inspect Robots checks `(policy, embodiment)` compatibility (action dims, semantics,
 camera/state keys) before any motion and writes an immutable `EvalLog`.
 
+## Run it in simulation
+
+Every task instance carries a machine-readable **sim annotation** (see
+`plans/0003-sim-support.md`): `kitchenbench.sim` resolves it into a
+`SceneBlueprint` (what to spawn, where, with per-instance success parameters)
+and defines the benchmark's **official quantitative success criteria** per
+target kind, so a physics simulator needs no human operator. A sim embodiment
+(Isaac Lab, MuJoCo, …):
+
+```python
+from kitchenbench import build_blueprint, make_success_checker
+
+# in Embodiment.reset(scene, seed=...) — the same per-epoch seed eval() passes:
+bp = build_blueprint(scene, seed)
+# ...spawn bp.objects from your asset catalog (nominal dims in kitchenbench.ASSETS),
+# apply bp.conditions, register the reserved names gripper_left/gripper_right...
+checker = make_success_checker(bp, world)   # world implements WorldState (4 queries)
+
+# per step(): once checker(world).success, terminate with
+# termination_reason="success" — the existing task_success scorer fires unchanged.
+```
+
+`WorldState` is four queries any simulator can answer (`aabb`,
+`contained_fraction`, `contained_mass_g`, `opening_fraction`); the criteria
+(nesting-aware stacking, mass-targeted pouring/scooping, transfer-detecting
+handoff, …) and their thresholds are versioned as `SIM_CONTRACT_VERSION` —
+log it with your runs. Declare `supported_target_kinds` on your embodiment so
+Inspect Robots gates scene realizability before any rollout. The checkers work off
+poses, not sim internals, so a pose-tracked *real* rig can reuse them too.
+
 ## Development
 
 > **Dependency changes:** after editing dependencies in `pyproject.toml`, run

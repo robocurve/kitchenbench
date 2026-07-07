@@ -63,6 +63,7 @@ ASSETS: Mapping[str, AssetSpec] = MappingProxyType(
         "jar": AssetSpec(9, 9, 12),
         "bottle": AssetSpec(7, 7, 24),
         "food_container": AssetSpec(18, 12, 8),
+        "container": AssetSpec(14, 14, 10),  # generic receiving container (scoop target)
         "lid": AssetSpec(18, 12, 3),
         "tray": AssetSpec(30, 40, 5),
         "compartment": AssetSpec(9, 36, 4),
