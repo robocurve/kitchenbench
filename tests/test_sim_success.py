@@ -145,6 +145,17 @@ def test_stack_plates_on_top_pass_and_side_by_side_fail() -> None:
     assert not verdict.success
 
 
+def test_stack_right_height_but_laterally_offset_fails() -> None:
+    # Correct stacking height, 20 cm to the side: the xy-overlap guard
+    # (not the z-interval check) must reject this.
+    offset = FakeWorld(
+        {"cup_1": _box(0, 0, 0, 0.09, 0.09, 0.10), "cup_2": _box(0.2, 0, 0.11, 0.09, 0.09, 0.10)}
+    )
+    verdict = make_success_checker(_stack_bp(), offset)(offset)
+    assert not verdict.success
+    assert "not over" in verdict.explanation
+
+
 def test_stack_floating_fails() -> None:
     floating = FakeWorld(
         {"cup_1": _box(0, 0, 0, 0.09, 0.09, 0.10), "cup_2": _box(0, 0, 0.20, 0.09, 0.09, 0.10)}

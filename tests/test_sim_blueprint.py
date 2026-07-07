@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from itertools import pairwise
 
 import numpy as np
 import pytest
@@ -77,7 +78,13 @@ def test_every_shipped_instance_builds_a_sound_blueprint(
         rounded = {(round(x, 1), round(y, 1)) for x, y in placements}
         assert len(rounded) == len(placements), f"coincident placements under {parent!r}: {label}"
 
-    # Conditions are verbatim realization values.
+    # Conditions are exactly the annotation's declared list, verbatim values —
+    # compared against the ANNOTATION so an empty/mangled dict cannot pass.
+    from kitchenbench.tasks import find_instance
+
+    instance = find_instance(scene)  # type: ignore[arg-type]
+    assert instance.sim is not None
+    assert set(blueprint.conditions) == set(instance.sim.conditions)
     for key, value in blueprint.conditions.items():
         assert blueprint.values[key] == value
 
@@ -113,7 +120,7 @@ def test_pinned_stack_count_expansion_and_spread() -> None:
     stack = [o for o in blueprint.objects if o.role == "stack"]
     assert len(stack) == int(values["count"])
     assert [o.name for o in stack] == [f"cup_{k + 1}" for k in range(len(stack))]
-    spacing = {round(b.x_cm - a.x_cm, 6) for a, b in zip(stack, stack[1:], strict=False)}
+    spacing = {round(b.x_cm - a.x_cm, 6) for a, b in pairwise(stack)}
     assert spacing == {round(float(values["spread_cm"]), 6)}
 
 
@@ -182,17 +189,26 @@ def test_pinned_handoff_receiving_arms() -> None:
         assert blueprint.success_params["receiving_arm"] == expected
 
 
-def test_pinned_size_order_mixed_sizes() -> None:
+def test_pinned_size_order_mixed_sizes_both_orders() -> None:
     scene = _scene("stack", 3)  # mixed-sizes: size_order sampled
-    seed = derive_seed(0, 3, 0)
-    blueprint = build_blueprint(scene, seed)  # type: ignore[arg-type]
-    values = realize_scene(scene, seed).values  # type: ignore[arg-type]
-    sizes = [o.size_cm for o in blueprint.objects if o.role == "stack"]
-    assert all(s is not None for s in sizes)
-    if values["size_order"] == "largest_first":
-        assert sizes == sorted(sizes, key=lambda s: -float(s))  # type: ignore[arg-type]
-    else:
-        assert sizes != sorted(sizes, key=lambda s: -float(s))  # type: ignore[arg-type]
+    # Epoch 0 samples "largest_first", epoch 1 samples "shuffled" (pinned).
+    seed_first = derive_seed(0, 3, 0)
+    values_first = realize_scene(scene, seed_first).values  # type: ignore[arg-type]
+    assert values_first["size_order"] == "largest_first"
+    bp = build_blueprint(scene, seed_first)  # type: ignore[arg-type]
+    sizes = [o.size_cm for o in bp.objects if o.role == "stack"]
+    assert sizes == sorted(sizes, key=lambda s: -float(s))  # type: ignore[arg-type]
+    base = float(sizes[0])  # type: ignore[arg-type]
+    assert sizes == [base * f for f in _size_factors(len(sizes), "largest_first")]
+
+    seed_shuffled = derive_seed(0, 3, 1)
+    values_shuffled = realize_scene(scene, seed_shuffled).values  # type: ignore[arg-type]
+    assert values_shuffled["size_order"] == "shuffled"
+    bp2 = build_blueprint(scene, seed_shuffled)  # type: ignore[arg-type]
+    sizes2 = [o.size_cm for o in bp2.objects if o.role == "stack"]
+    base2 = float(max(s for s in sizes2 if s is not None))
+    # The documented deterministic rotation, end to end through _expand.
+    assert sizes2 == [base2 * f for f in _size_factors(len(sizes2), "shuffled")]
 
 
 def test_size_factor_sequences() -> None:
@@ -237,7 +253,6 @@ def test_size_order_respects_bound_size() -> None:
     from kitchenbench.specs import SPEC_BY_KEY
 
     instance = SPEC_BY_KEY["stack"].instances[0]
-    resolver = _Resolver(instance, {"count": 3, "spread_cm": 6.0, "base_cm": 20.0})
     obj = SimObject(
         name="bowl",
         asset="bowl",
@@ -247,10 +262,16 @@ def test_size_order_respects_bound_size() -> None:
         size_cm=Var("base_cm"),
         size_order=Var("order"),
     )
-    # 'order' resolves from neither values nor statics -> use a literal-value
-    # resolver instead: rebuild with order in values.
     resolver = _Resolver(
         instance, {"count": 3, "spread_cm": 6.0, "base_cm": 20.0, "order": "largest_first"}
     )
     expanded = _expand(obj, resolver)
     assert [o.size_cm for o in expanded] == [20.0, 20.0 * 0.88, 20.0 * 0.76]
+
+
+def test_pinned_conditions_survive_verbatim() -> None:
+    scene = _scene("place_cutlery", 1)  # from-drawer: approach_angle_deg condition
+    seed = derive_seed(0, 1, 0)
+    blueprint = build_blueprint(scene, seed)  # type: ignore[arg-type]
+    values = realize_scene(scene, seed).values  # type: ignore[arg-type]
+    assert dict(blueprint.conditions) == {"approach_angle_deg": values["approach_angle_deg"]}
