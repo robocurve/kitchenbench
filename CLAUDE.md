@@ -66,3 +66,23 @@ in their own package (e.g. `robocurve/embodiments`), not here. KitchenBench ship
 only the tasks + a mock world. See the README's "Run it on real hardware" section
 for the contract those adapters must implement (operator-confirmed success →
 `termination_reason="success"`; declare `"self_paced"` and pace `step()`).
+
+## CI, merging, and releases
+
+- **main is PR-only** — a branch ruleset (admins included) blocks direct pushes,
+  force pushes, and deletion. Merging requires the `ci-ok` check green and the
+  branch up to date with main.
+- **`ci-ok` is the single required status check** — an aggregate job at the end
+  of `ci.yml`. When adding a CI job, add it to `ci-ok`'s `needs` list, or it
+  will not gate merges.
+- **Red main is stop-the-line**: if CI fails on a push to main, the
+  `alert-red-main` job opens an issue. Fix forward or revert before merging
+  anything else; if the failure was transient, re-run the failed jobs and close
+  the issue.
+- **CI installs from `uv.lock`** (`uv sync --locked`). After changing
+  dependencies in `pyproject.toml`, run `uv lock` and commit the lockfile —
+  otherwise CI fails with "the lockfile needs to be updated".
+- **Releases are one-click**: Actions → Release → Run workflow → pick
+  patch/minor/major. The version is derived from the git tag by hatch-vcs —
+  never add a static `version =` back to pyproject (`__version__` comes from importlib.metadata). The same
+  run publishes to PyPI via trusted publishing; nothing is pushed to main.
