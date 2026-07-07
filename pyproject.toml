@@ -37,12 +37,8 @@ Collection = "https://github.com/robocurve/worldevals"
 Framework = "https://github.com/robocurve/inspect-robots"
 
 # Inspect Robots isn't on PyPI yet — resolve it from the tagged GitHub release. This is
-# uv-only metadata (stripped from the published package), so CI uses uv. For local
-# development against a sibling checkout, override with an editable install:
+# For local development against a sibling checkout, use an editable install:
 #   uv pip install -e ../inspect-robots
-[tool.uv.sources]
-inspect-robots = { git = "https://github.com/robocurve/inspect-robots", tag = "v0.3.0" }
-
 # Inspect Robots discovers these by entry point — no import needed for `inspect-robots list`.
 [project.entry-points."inspect_robots.tasks"]
 "kitchenbench/place_cutlery" = "kitchenbench.tasks:place_cutlery"
