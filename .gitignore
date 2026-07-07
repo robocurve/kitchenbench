@@ -217,8 +217,8 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# uv lockfile (this is a library; CI resolves from pyproject)
-uv.lock
+# uv.lock is committed: CI installs with `uv sync --locked` for reproducible
+# builds. Run `uv lock` after changing dependencies in pyproject.toml.
 
 # Local read-only copy of the methodology reference (not part of the package)
 reference/
