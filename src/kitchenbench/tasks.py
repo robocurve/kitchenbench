@@ -20,7 +20,7 @@ from typing import Any
 from inspect_robots import Epochs, Scene, Target, Task, episode_length, task
 from inspect_robots.rollout import derive_seed
 
-from kitchenbench.instances import K_INSTANCES, K_REALIZATIONS, Realization
+from kitchenbench.instances import K_INSTANCES, K_REALIZATIONS, Realization, TaskInstance
 from kitchenbench.scoring import task_success
 from kitchenbench.specs import SPEC_BY_KEY, TaskSpec
 
@@ -66,22 +66,28 @@ def build_scenes(spec: TaskSpec) -> list[Scene]:
     return scenes
 
 
-def realize_scene(scene: Scene, seed: int | None) -> Realization:
-    """Recover the task instance behind a Scene and realize it for ``seed``.
+def find_instance(scene: Scene) -> TaskInstance:
+    """Recover the task instance behind a Scene (by stable ``instance_id``).
 
-    The seam a real embodiment / operator tool uses to get the concrete setup for
-    a given realization. Recovery is by ``instance_id`` (stable across releases),
-    not by position — a scene logged under an older task set either resolves to
-    the same instance or fails loudly, never silently realizes a different one.
-    ``seed=None`` (direct ``reset(scene)`` calls) is guarded to ``0`` for
-    determinism.
+    A scene logged under an older task set either resolves to the same instance
+    or fails loudly, never silently to a different one.
     """
     key = str(scene.metadata["task"])
     instance_id = str(scene.metadata["instance_id"])
     for inst in SPEC_BY_KEY[key].instances:
         if inst.instance_id == instance_id:
-            return inst.realize(seed if seed is not None else 0)
+            return inst
     raise LookupError(f"no instance {instance_id!r} in task {key!r} (removed or renamed?)")
+
+
+def realize_scene(scene: Scene, seed: int | None) -> Realization:
+    """Realize the instance behind a Scene for ``seed``.
+
+    The seam a real embodiment / operator tool uses to get the concrete setup
+    for a given realization. ``seed=None`` (direct ``reset(scene)`` calls) is
+    guarded to ``0`` for determinism.
+    """
+    return find_instance(scene).realize(seed if seed is not None else 0)
 
 
 def make_task(spec: TaskSpec) -> Task:

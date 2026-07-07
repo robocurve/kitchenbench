@@ -60,7 +60,6 @@ class Realization:
     setup_lines: tuple[str, ...]
 
 
-
 @dataclass(frozen=True)
 class Var:
     """A reference to a setup variable (or static), resolved at realization time."""

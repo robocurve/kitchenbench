@@ -116,9 +116,7 @@ def test_reserved_parent_allowed() -> None:
 
 def test_split_without_count_rejected() -> None:
     spec = SimSpec(
-        objects=(
-            SimObject(name="thing", asset=Var("thing"), split=("spoon", "fork")),
-        ),
+        objects=(SimObject(name="thing", asset=Var("thing"), split=("spoon", "fork")),),
         conditions=("thing_x_cm", "grip"),
     )
     with pytest.raises(ValueError, match="split but no count"):
