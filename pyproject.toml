@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling>=1.18"]
+requires = ["hatchling>=1.18", "hatch-vcs>=0.3"]
 build-backend = "hatchling.build"
 
 [project]
 name = "kitchenbench"
-version = "0.3.0"
+dynamic = ["version"]
 description = "A bimanual kitchen-manipulation benchmark for VLA models, built on Inspect Robots."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -37,12 +37,8 @@ Collection = "https://github.com/robocurve/worldevals"
 Framework = "https://github.com/robocurve/inspect-robots"
 
 # Inspect Robots isn't on PyPI yet — resolve it from the tagged GitHub release. This is
-# uv-only metadata (stripped from the published package), so CI uses uv. For local
-# development against a sibling checkout, override with an editable install:
+# For local development against a sibling checkout, use an editable install:
 #   uv pip install -e ../inspect-robots
-[tool.uv.sources]
-inspect-robots = { git = "https://github.com/robocurve/inspect-robots", tag = "v0.3.0" }
-
 # Inspect Robots discovers these by entry point — no import needed for `inspect-robots list`.
 [project.entry-points."inspect_robots.tasks"]
 "kitchenbench/place_cutlery" = "kitchenbench.tasks:place_cutlery"
@@ -66,6 +62,19 @@ kitchen_noop = "kitchenbench.policies:NoopKitchenPolicy"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/kitchenbench"]
+
+
+# ---------------------------------------------------------------------------
+# Versioning: single-source the version from git tags via hatch-vcs (the
+# release workflow cuts a vX.Y.Z tag; nothing is committed to main).
+# ---------------------------------------------------------------------------
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+# Before/without tags (e.g. shallow CI checkouts), fall back instead of failing.
+version_scheme = "guess-next-dev"
+fallback_version = "0.0.0"
 
 [tool.ruff]
 line-length = 100
