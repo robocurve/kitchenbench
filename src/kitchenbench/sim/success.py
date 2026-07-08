@@ -235,7 +235,21 @@ def _check_seal(blueprint: SceneBlueprint) -> Callable[[WorldState], Verdict]:
 
 
 class _HandoffChecker:
-    """Stateful: success only when an established holder *hands over*."""
+    """Stateful: success only when an established holder *directly* hands over.
+
+    "Handoff" means the item moves gripper-to-gripper. Three rules keep that
+    honest with proximity-only holding detection:
+
+    - A set-down resets the tracked holder: once the item is away from both
+      grippers, placing it on the bench and regrasping with the other arm is
+      *placing*, not a handoff (and a transient false "hold" — a gripper merely
+      passing near the item — can't poison the rest of the trial).
+    - Both grippers in range without a strict nearer one is ambiguous
+      (mid-transfer); the tracked holder is kept, never re-established.
+    - A completed transfer to the *wrong* arm fails but re-establishes the
+      holder, so a subsequent transfer back to the required arm can still
+      succeed — the first grasp of a trial is not a life sentence.
+    """
 
     def __init__(self, item: str, receiving_arm: str) -> None:
         self._item = item
@@ -259,7 +273,13 @@ class _HandoffChecker:
         except KeyError as exc:
             return Verdict(False, f"unknown object {exc.args[0]!r}")
         if holder is None:
-            return Verdict(False, f"{self._item} is not held")
+            if min(distances.values()) > GRASP_RADIUS_M:
+                # Away from both grippers: a set-down, not part of a handoff.
+                self._holder = None
+                return Verdict(False, f"{self._item} is not held")
+            # Both grippers in range, neither strictly nearer: ambiguous
+            # (mid-transfer); keep the established holder.
+            return Verdict(False, f"{self._item} grip is ambiguous (both grippers in range)")
         if self._holder is None:
             self._holder = holder
             return Verdict(False, f"{self._item} held by {holder}")
@@ -269,6 +289,9 @@ class _HandoffChecker:
         # mid-transfer must not count as success).
         if distances[self._holder] <= GRASP_RADIUS_M:
             return Verdict(False, f"{self._item} held by both grippers (mid-transfer)")
+        # A completed gripper-to-gripper transfer: the taker is the holder now,
+        # whether or not it was the required arm.
+        self._holder = holder
         received_side = holder.removeprefix("gripper_")
         if self._receiving != "either" and received_side != self._receiving:
             return Verdict(

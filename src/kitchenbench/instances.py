@@ -73,11 +73,14 @@ class SimObject:
 
     Placements are centimeters/degrees in the bench frame, or in the parent
     object's frame when :attr:`parent` is set (compartments ride their tray;
-    a substance spawns inside its source vessel). ``count > 1`` expands to
-    ``name_1..name_n`` laid out deterministically: copy ``k`` (0-based) sits at
-    ``(x_cm + k * spread_cm, y_cm)``. ``split`` round-robins asset classes over
-    the copies in declared order. ``size_order`` ("largest_first"/"shuffled")
-    maps to a documented deterministic per-copy size sequence.
+    a substance spawns inside its source vessel). A ``count`` bound to a
+    ``Var`` — and any literal ``count > 1`` — expands to ``name_1..name_n``
+    (numbered even when a sampled count resolves to 1, so names stay stable
+    across epochs) laid out deterministically: copy ``k`` (0-based) sits at
+    ``(x_cm + k * spread_cm, y_cm)``. Counts below 1 are a blueprint-time
+    error. ``split`` round-robins asset classes over the copies in declared
+    order. ``size_order`` ("largest_first"/"shuffled") maps to a documented
+    deterministic per-copy size sequence.
     """
 
     name: str

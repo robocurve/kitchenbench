@@ -236,6 +236,8 @@ from kitchenbench import build_blueprint, make_success_checker
 bp = build_blueprint(scene, seed)
 # ...spawn bp.objects from your asset catalog (nominal dims in kitchenbench.ASSETS),
 # apply bp.conditions, register the reserved names gripper_left/gripper_right...
+# build the checker AFTER spawning, with the scene at rest: some criteria
+# capture initial state at construction (fold's baseline footprint).
 checker = make_success_checker(bp, world)   # world implements WorldState (4 queries)
 
 # per step(): once checker(world).success, terminate with

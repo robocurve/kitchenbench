@@ -269,6 +269,40 @@ def test_size_order_respects_bound_size() -> None:
     assert [o.size_cm for o in expanded] == [20.0, 20.0 * 0.88, 20.0 * 0.76]
 
 
+def test_size_factors_floored_above_zero() -> None:
+    # A large count can never yield a zero/negative size.
+    assert all(f >= SIZE_ORDER_STEP for f in _size_factors(20, "largest_first"))
+
+
+def test_expand_count_below_one_raises() -> None:
+    from kitchenbench.instances import SimObject, Var
+    from kitchenbench.sim.blueprint import _expand, _Resolver
+
+    instance = SPEC_BY_KEY["stack"].instances[0]
+    obj = SimObject(name="cup", asset="cup", count=Var("count"))
+    with pytest.raises(ValueError, match="counts must be >= 1"):
+        _expand(obj, _Resolver(instance, {"count": 0}))
+
+
+def test_var_count_resolving_to_one_still_numbers() -> None:
+    """Sampled counts number their copies even at 1: names stay stable across epochs."""
+    from kitchenbench.instances import SimObject, Var
+    from kitchenbench.sim.blueprint import _expand, _Resolver
+
+    instance = SPEC_BY_KEY["stack"].instances[0]
+    obj = SimObject(
+        name="cutlery", asset="cutlery", role="sortable", count=Var("count"), split=("spoon",)
+    )
+    (only,) = _expand(obj, _Resolver(instance, {"count": 1}))
+    assert only.name == "cutlery_1"
+    assert only.asset == "spoon"  # split applies to the numbered copy too
+
+    # A literal count of 1 keeps the bare annotation name.
+    (bare,) = _expand(SimObject(name="fork", asset="fork"), _Resolver(instance, {}))
+    assert bare.name == "fork"
+    assert bare.asset == "fork"
+
+
 def test_pinned_conditions_survive_verbatim() -> None:
     scene = _scene("place_cutlery", 1)  # from-drawer: approach_angle_deg condition
     seed = derive_seed(0, 1, 0)

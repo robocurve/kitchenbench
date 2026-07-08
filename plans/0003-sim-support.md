@@ -9,6 +9,16 @@ confirmed with the owner: **sim semantics are explicit, per-instance
 annotations in the specs themselves** — the single source of truth carries its
 own machine-readable meaning; nothing is guessed.
 
+Revision 3 (PR review follow-up): handoff requires a **direct**
+gripper-to-gripper transfer — a set-down resets the tracked holder (a
+bench-mediated regrasp is *placing*, not a handoff, and a transient false
+"hold" can no longer poison the trial), a both-in-range tie is treated as
+mid-transfer (holder kept), and a completed wrong-arm transfer re-establishes
+the holder so a later correct handoff can still succeed. Count expansion:
+counts below 1 are a blueprint-time error, and a `Var`-bound count always
+numbers its copies (even when it resolves to 1) so names stay stable across
+epochs; `size_order` factors are floored above zero.
+
 ## 1. Goal
 
 Make KitchenBench runnable on physics simulators (a third embodiment class next
@@ -177,7 +187,7 @@ them.
 | `open` | container | `opening_fraction ≥ OPEN_FRACTION` |
 | `fold` | cloth; params `fold_count` or `flat_w_cm`+`flat_h_cm` | xy-footprint area ≤ `FOLD_RATIO_PER_FOLD ** fold_count` × baseline area; baseline = initial capture normally, but crumpled-start annotates the cloth's **nominal flat dims** (`flat_w_cm × flat_h_cm`, part of the asset contract) as the denominator since its initial footprint is already shrunk |
 | `seal` | lid, container | lid xy-center inside container footprint ∧ lid bottom within `SEAL_TOL_M` of container top (separate, looser than `CONTACT_TOL_M` — screw lids seat below the rim) |
-| `handoff` | item; param `receiving_arm` ("left"/"right"/"either") | **transfer-detecting and stateful**: the checker tracks the holder per evaluation (holder = gripper whose AABB center is within `GRASP_RADIUS_M` and strictly nearer than the other); success once the holder has changed from an established first holder to the other gripper **and the previous holder is beyond `GRASP_RADIUS_M`** (mid-transfer, with both grippers on the item, must not fire) — matching `receiving_arm` when pinned ("left"/"right" for pickup/release-forced instances: utensil, cross-body), any direction for the 3 direction-symmetric instances ("either") |
+| `handoff` | item; param `receiving_arm` ("left"/"right"/"either") | **transfer-detecting and stateful**: the checker tracks the holder per evaluation (holder = gripper whose AABB center is within `GRASP_RADIUS_M` and strictly nearer than the other); success once the holder has changed from an established holder to the other gripper **and the previous holder is beyond `GRASP_RADIUS_M`** (mid-transfer, with both grippers on the item, must not fire); the transfer must be **direct** — a set-down (item away from both grippers) resets the tracked holder, so bench-mediated regrasps don't count — and a completed wrong-arm transfer re-establishes the holder (rev 3) — matching `receiving_arm` when pinned ("left"/"right" for pickup/release-forced instances: utensil, cross-body), any direction for the 3 direction-symmetric instances ("either") |
 | `sort` | compartments (multi, `compartment_<class>`), sortables (multi) | every sortable `contained_fraction(obj, compartment_<its class>) ≥ CONTAIN_FRACTION` (classes from the annotation's split/statics) |
 | `scoop_transfer` | container; params `substance`, `target_g`, `tol_g` | `abs(contained_mass_g − target_g) ≤ tol_g` (default `SCOOP_TOL_G`, which dominates instruction rounding) — the *target amount*, not the whole pile. **Requires a small spec change** (owner-visible in the PR): the 5 scoop goal templates gain the target ("scoop about {fill_target_g:.0f} g of the {pasta} …" — format spec keeps the instruction readable); `fill_target_g` joins `language_vars`, instructions change, and the scoop `TaskSpec.version` bumps to "2" (a benchmark-definition change, named explicitly in milestone 2 — without it success depends on a value neither the policy nor a real-world operator can observe, a pre-existing benchmark bug this work surfaced) |
 

@@ -124,8 +124,12 @@ def _slug_asset(value: str) -> str:
 
 
 def _size_factors(count: int, order: str) -> list[float]:
-    """Deterministic per-copy size factors for ``size_order`` expansions."""
-    factors = [1.0 - SIZE_ORDER_STEP * k for k in range(count)]
+    """Deterministic per-copy size factors for ``size_order`` expansions.
+
+    Floored at ``SIZE_ORDER_STEP`` so a large count can never yield a zero or
+    negative size (today's counts max out at 5, nowhere near the floor).
+    """
+    factors = [max(1.0 - SIZE_ORDER_STEP * k, SIZE_ORDER_STEP) for k in range(count)]
     if order == "shuffled":
         # Fixed rotation, not an RNG shuffle: reproducible everywhere.
         pivot = count // 2
@@ -158,8 +162,16 @@ class _Resolver:
 
 
 def _expand(obj: SimObject, resolver: _Resolver) -> list[SceneObject]:
-    """One annotation object -> one or ``count`` concrete objects, laid out."""
+    """One annotation object -> one or ``count`` concrete objects, laid out.
+
+    A ``count`` bound to a ``Var`` always expands to numbered copies
+    (``name_1..name_n``), even when it resolves to 1, so object names stay
+    stable across epochs of the same instance. Only a literal ``count=1``
+    keeps the bare annotation name.
+    """
     count = int(resolver.number(obj.count))
+    if count < 1:
+        raise ValueError(f"object {obj.name!r} resolved count {count}; counts must be >= 1")
     base_asset = _slug_asset(str(resolver.scalar(obj.asset)))
     x = resolver.number(obj.x_cm)
     y = resolver.number(obj.y_cm)
@@ -168,7 +180,7 @@ def _expand(obj: SimObject, resolver: _Resolver) -> list[SceneObject]:
     size = resolver.optional_number(obj.size_cm)
     amount = resolver.optional_number(obj.amount_g)
 
-    if count <= 1:
+    if count == 1 and not isinstance(obj.count, Var):
         return [
             SceneObject(
                 name=obj.name,

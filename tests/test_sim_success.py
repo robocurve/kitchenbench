@@ -339,6 +339,50 @@ def test_handoff_missing_gripper_fails_soft() -> None:
     assert "unknown object" in verdict.explanation
 
 
+def test_handoff_bench_mediated_regrasp_does_not_count() -> None:
+    # left holds -> item set down on the bench -> right picks it up: that is
+    # placing, not a handoff. The set-down resets the tracked holder.
+    checker = make_success_checker(_handoff_bp("either"), FakeWorld())
+    assert not checker(_grip_world(item_x=-0.28)).success  # holder=left
+    assert not checker(_grip_world(item_x=0.0)).success  # set down: holder reset
+    verdict = checker(_grip_world(item_x=0.28))  # right regrasps from the bench
+    assert not verdict.success
+    assert "held by gripper_right" in verdict.explanation  # re-established, no transfer
+    # A subsequent DIRECT transfer still succeeds.
+    assert checker(_grip_world(item_x=-0.28)).success
+
+
+def test_handoff_wrong_arm_transfer_reestablishes_holder() -> None:
+    # The wrong gripper grasping first is not a life sentence: after a
+    # completed (failing) transfer to the wrong arm, a transfer back to the
+    # required arm succeeds.
+    checker = make_success_checker(_handoff_bp("right"), FakeWorld())
+    assert not checker(_grip_world(item_x=0.28)).success  # right established first
+    wrong = checker(_grip_world(item_x=-0.28))  # right -> left completes
+    assert not wrong.success
+    assert "not right" in wrong.explanation
+    assert checker(_grip_world(item_x=0.28)).success  # left -> right: success
+
+
+def test_handoff_equidistant_grip_is_ambiguous_and_keeps_holder() -> None:
+    checker = make_success_checker(_handoff_bp("right"), FakeWorld())
+    assert not checker(_grip_world(item_x=-0.28)).success  # holder=left
+    tie = FakeWorld(
+        {
+            # Both grippers exactly 5 cm from the item: in range, no strict
+            # nearer one. Must read as mid-transfer, not as a set-down.
+            "cup": _box(0.0, 0, 0.2, 0.09, 0.09, 0.10),
+            "gripper_left": _box(-0.05, 0, 0.2, 0.06, 0.06, 0.12),
+            "gripper_right": _box(0.05, 0, 0.2, 0.06, 0.06, 0.12),
+        }
+    )
+    verdict = checker(tie)
+    assert not verdict.success
+    assert "ambiguous" in verdict.explanation
+    # The established holder survived the tie: completing the transfer fires.
+    assert checker(_grip_world(item_x=0.28)).success
+
+
 # --------------------------------------------------------------------------- #
 # sort
 # --------------------------------------------------------------------------- #
