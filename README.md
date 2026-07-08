@@ -7,12 +7,16 @@
 Built on [Inspect Robots](https://github.com/robocurve/inspect-robots) · part of
 [WorldEvals](https://github.com/robocurve/worldevals), the "Inspect Evals for robotics".
 
+![Status: alpha](https://img.shields.io/badge/status-alpha-blue)
 [![CI](https://github.com/robocurve/kitchenbench/actions/workflows/ci.yml/badge.svg)](https://github.com/robocurve/kitchenbench/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/robocurve/kitchenbench/actions/workflows/ci.yml)
 [![Built on Inspect Robots](https://img.shields.io/badge/built%20on-Inspect%20Robots-indigo)](https://github.com/robocurve/inspect-robots)
 
 </div>
+
+> [!NOTE]
+> This project is in early development. The API may change between releases, so pin a version before depending on it.
 
 KitchenBench is **10 kitchen-manipulation tasks** expressed as Inspect Robots `Task`s —
 embodiment-agnostic, so you run them against *any* compatible policy/embodiment.
