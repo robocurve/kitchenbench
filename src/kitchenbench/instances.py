@@ -77,7 +77,9 @@ class SimObject:
     ``Var`` — and any literal ``count > 1`` — expands to ``name_1..name_n``
     (numbered even when a sampled count resolves to 1, so names stay stable
     across epochs) laid out deterministically: copy ``k`` (0-based) sits at
-    ``(x_cm + k * spread_cm, y_cm)``. Counts below 1 are a blueprint-time
+    ``(x_cm + k * spacing, y_cm)`` where spacing is ``spread_cm`` clamped up
+    to the widest copy's nominal footprint plus a clearance, so rigid copies
+    never interpenetrate at spawn. Counts below 1 are a blueprint-time
     error. ``split`` round-robins asset classes over the copies in declared
     order. ``size_order`` ("largest_first"/"shuffled") maps to a documented
     deterministic per-copy size sequence.

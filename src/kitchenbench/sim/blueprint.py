@@ -84,6 +84,15 @@ ASSETS: Mapping[str, AssetSpec] = MappingProxyType(
 #: sequence (no RNG — reproducible from the annotation alone).
 SIZE_ORDER_STEP = 0.12
 
+#: Minimum edge-to-edge clearance (cm) between expanded copies. A sampled
+#: spread narrower than a copy's own footprint would make rigid bodies
+#: interpenetrate at spawn — a pose no simulator can honor, so each engine's
+#: penetration resolution would scatter the objects differently and break the
+#: same-seed-same-scene guarantee. Spacing is clamped to
+#: ``widest copy footprint + SPREAD_CLEARANCE_CM``; the sampled value stays
+#: verbatim in ``SceneBlueprint.values``.
+SPREAD_CLEARANCE_CM = 1.0
+
 
 @dataclass(frozen=True)
 class SceneObject:
@@ -202,6 +211,11 @@ def _expand(obj: SimObject, resolver: _Resolver) -> list[SceneObject]:
         if size is None:
             size = ASSETS[base_asset].footprint_w_cm
 
+    # Rigid copies must not interpenetrate at spawn (see SPREAD_CLEARANCE_CM).
+    classes = [_slug_asset(c) for c in obj.split] if obj.split else [base_asset]
+    min_spacing = max(ASSETS[c].footprint_w_cm for c in classes) + SPREAD_CLEARANCE_CM
+    spacing = max(spread, min_spacing)
+
     expanded: list[SceneObject] = []
     for k in range(count):
         asset = _slug_asset(obj.split[k % len(obj.split)]) if obj.split else base_asset
@@ -210,7 +224,7 @@ def _expand(obj: SimObject, resolver: _Resolver) -> list[SceneObject]:
                 name=f"{obj.name}_{k + 1}",
                 asset=asset,
                 role=obj.role,
-                x_cm=x + k * spread,
+                x_cm=x + k * spacing,
                 y_cm=y,
                 yaw_deg=yaw,
                 parent=obj.parent,

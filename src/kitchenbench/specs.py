@@ -982,7 +982,7 @@ def _sort_fixtures(
             asset="compartment",
             role="compartment",
             parent="tray",
-            x_cm=-6.0,
+            x_cm=-10.0,
         ),
         SimObject(
             name="compartment_fork",
@@ -996,7 +996,7 @@ def _sort_fixtures(
             asset="compartment",
             role="compartment",
             parent="tray",
-            x_cm=6.0,
+            x_cm=10.0,
         ),
     )
 

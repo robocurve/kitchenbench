@@ -240,10 +240,29 @@ def test_fold_nominal_baseline_for_crumpled_start() -> None:
     # dish_towel nominal 45x65 cm -> baseline 0.2925 m2; threshold 0.6x.
     crumpled = FakeWorld({"cloth": _box(0, 0, 0, 0.3, 0.35, 0.05)})
     checker = make_success_checker(bp, crumpled)
-    folded_small = FakeWorld({"cloth": _box(0, 0, 0, 0.3, 0.35, 0.05)})
-    assert checker(folded_small).success  # 0.105 <= 0.1755
+    # The crumpled INITIAL state has a small footprint but is 5 cm tall:
+    # success must NOT fire at t=0 (the flatness gate, not the area, rejects).
+    verdict = checker(crumpled)
+    assert not verdict.success
+    assert "not lying flat" in verdict.explanation
+    folded_flat = FakeWorld({"cloth": _box(0, 0, 0, 0.3, 0.35, 0.02)})
+    assert checker(folded_flat).success  # 0.105 <= 0.1755, and flat
     spread_out = FakeWorld({"cloth": _box(0, 0, 0, 0.45, 0.65, 0.01)})
     assert not checker(spread_out).success
+
+
+def test_fold_lifted_cloth_does_not_count() -> None:
+    # A grasped, hanging cloth has a tiny footprint by definition — the
+    # flatness gate must reject it, or every fold trial "succeeds" at pickup.
+    bp = _blueprint("fold", (_obj("cloth", role="cloth"),), {"fold_count": 1})
+    flat = FakeWorld({"cloth": _box(0, 0, 0, 0.4, 0.4, 0.01)})
+    checker = make_success_checker(bp, flat)
+    hanging = FakeWorld({"cloth": _box(0, 0, 0.05, 0.03, 0.4, 0.35)})
+    verdict = checker(hanging)
+    assert not verdict.success
+    assert "not lying flat" in verdict.explanation
+    folded = FakeWorld({"cloth": _box(0, 0, 0, 0.4, 0.2, 0.02)})
+    assert checker(folded).success
 
 
 def test_fold_slack_loosens_threshold() -> None:
@@ -362,6 +381,30 @@ def test_handoff_wrong_arm_transfer_reestablishes_holder() -> None:
     assert not wrong.success
     assert "not right" in wrong.explanation
     assert checker(_grip_world(item_x=0.28)).success  # left -> right: success
+
+
+def test_handoff_long_tool_end_grasp_counts() -> None:
+    # Grasp distance is measured to the item's AABB, not its center: an end
+    # grasp of a 40 cm tool (20 cm from center) is a grasp, and a natural
+    # end-to-end handoff succeeds.
+    def tool_world(left_x: float, right_x: float) -> FakeWorld:
+        return FakeWorld(
+            {
+                "tool": _box(0.0, 0, 0.2, 0.40, 0.04, 0.03),  # spans x in [-0.2, 0.2]
+                "gripper_left": _box(left_x, 0, 0.2, 0.06, 0.06, 0.12),
+                "gripper_right": _box(right_x, 0, 0.2, 0.06, 0.06, 0.12),
+            }
+        )
+
+    bp = _blueprint("handoff", (_obj("tool", "utensil", "item"),), {"receiving_arm": "right"})
+    checker = make_success_checker(bp, FakeWorld())
+    assert not checker(tool_world(left_x=-0.2, right_x=0.5)).success  # left end grasp: held
+    both = checker(tool_world(left_x=-0.2, right_x=0.2))  # both ends: tie, no success
+    assert not both.success
+    assert "ambiguous" in both.explanation
+    verdict = checker(tool_world(left_x=-0.5, right_x=0.2))  # left retreats
+    assert verdict.success
+    assert "handed off to right" in verdict.explanation
 
 
 def test_handoff_equidistant_grip_is_ambiguous_and_keeps_holder() -> None:

@@ -34,7 +34,12 @@ CONTAIN_FRACTION = 0.8  # rigid item "in" a rack/compartment
 TRANSFER_FRACTION = 0.8  # poured substance mass fraction that must arrive
 OPEN_FRACTION = 0.7  # articulation opening fraction counting as "open"
 FOLD_RATIO_PER_FOLD = 0.6  # footprint-area ratio per completed fold
-GRASP_RADIUS_M = 0.12  # item-to-gripper-center distance counting as "held"
+FOLD_MAX_HEIGHT_M = 0.04  # folded cloth lies flat: z-extent above this is a
+#   grasped/hanging or still-crumpled cloth, whose footprint shrinks for the
+#   wrong reason — footprint alone must never fire the fold criterion
+GRASP_RADIUS_M = 0.12  # gripper-center-to-item-AABB distance counting as "held"
+#   (surface distance, not center distance: an end grasp of a 40 cm tool is a
+#   grasp; measuring to the item's center would rule it out by geometry)
 SCOOP_TOL_G = 15.0  # default scoop tolerance; dominates instruction rounding
 
 _GRIPPERS = ("gripper_left", "gripper_right")
@@ -92,6 +97,19 @@ def _xy_inside(
 def _footprint_area(aabb: tuple[NDArray[np.float64], NDArray[np.float64]]) -> float:
     low, high = np.asarray(aabb[0]), np.asarray(aabb[1])
     return float((high[0] - low[0]) * (high[1] - low[1]))
+
+
+def _height(aabb: tuple[NDArray[np.float64], NDArray[np.float64]]) -> float:
+    return float(np.asarray(aabb[1])[2] - np.asarray(aabb[0])[2])
+
+
+def _distance_to_box(
+    point: NDArray[np.float64], aabb: tuple[NDArray[np.float64], NDArray[np.float64]]
+) -> float:
+    """Euclidean distance from ``point`` to the nearest point of ``aabb`` (0 inside)."""
+    low, high = np.asarray(aabb[0], dtype=np.float64), np.asarray(aabb[1], dtype=np.float64)
+    gap = np.maximum(np.maximum(low - point, point - high), 0.0)
+    return float(np.linalg.norm(gap))
 
 
 def _one(blueprint: SceneBlueprint, role: str) -> str:
@@ -211,7 +229,14 @@ def _check_fold(blueprint: SceneBlueprint, world: WorldState) -> Callable[[World
     threshold = (FOLD_RATIO_PER_FOLD**fold_count) * (1.0 + slack) * baseline
 
     def criterion(world: WorldState) -> Verdict:
-        area = _footprint_area(world.aabb(cloth))
+        box = world.aabb(cloth)
+        # Footprint alone shrinks for the wrong reasons — a grasped, hanging
+        # cloth or a still-crumpled ball both have small footprints. A folded
+        # cloth also lies FLAT: gate on z-extent first.
+        height = _height(box)
+        if height > FOLD_MAX_HEIGHT_M:
+            return Verdict(False, f"{cloth} is not lying flat (height {height * 100:.0f} cm)")
+        area = _footprint_area(box)
         if area <= threshold:
             return Verdict(True, f"{cloth} folded (footprint {area * 1e4:.0f} cm2)")
         return Verdict(False, f"{cloth} not folded ({area * 1e4:.0f} > {threshold * 1e4:.0f} cm2)")
@@ -257,9 +282,11 @@ class _HandoffChecker:
         self._holder: str | None = None
 
     def _current_holder(self, world: WorldState) -> tuple[str | None, dict[str, float]]:
-        item_center = _center(world.aabb(self._item))
+        # Distance from each gripper's center to the item's AABB *surface*, not
+        # its center: an end grasp of a long tool is still a grasp.
+        item_box = world.aabb(self._item)
         distances = {
-            gripper: float(np.linalg.norm(_center(world.aabb(gripper)) - item_center))
+            gripper: _distance_to_box(_center(world.aabb(gripper)), item_box)
             for gripper in _GRIPPERS
         }
         near, far = sorted(_GRIPPERS, key=lambda g: distances[g])

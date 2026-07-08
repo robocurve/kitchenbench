@@ -16,7 +16,7 @@ from kitchenbench.sim import (
     build_blueprint,
     make_success_checker,
 )
-from kitchenbench.sim.blueprint import SIZE_ORDER_STEP, _size_factors
+from kitchenbench.sim.blueprint import SIZE_ORDER_STEP, SPREAD_CLEARANCE_CM, _size_factors
 from kitchenbench.specs import SPEC_BY_KEY
 from kitchenbench.tasks import build_scenes, realize_scene
 
@@ -78,6 +78,21 @@ def test_every_shipped_instance_builds_a_sound_blueprint(
         rounded = {(round(x, 1), round(y, 1)) for x, y in placements}
         assert len(rounded) == len(placements), f"coincident placements under {parent!r}: {label}"
 
+    # Rigid copies never interpenetrate at spawn: every expanded family is
+    # spaced at least the widest copy's nominal footprint + clearance apart.
+    families: dict[str, list[float]] = {}
+    widest: dict[str, float] = {}
+    for obj in blueprint.objects:
+        stem, _, index = obj.name.rpartition("_")
+        if stem and index.isdigit():
+            families.setdefault(stem, []).append(obj.x_cm)
+            widest[stem] = max(widest.get(stem, 0.0), ASSETS[obj.asset].footprint_w_cm)
+    for stem, xs in families.items():
+        for a, b in pairwise(sorted(xs)):
+            assert b - a >= widest[stem] + SPREAD_CLEARANCE_CM - 1e-9, (
+                f"copies of {stem!r} interpenetrate at spawn: {label}"
+            )
+
     # Conditions are exactly the annotation's declared list, verbatim values —
     # compared against the ANNOTATION so an empty/mangled dict cannot pass.
     from kitchenbench.tasks import find_instance
@@ -121,7 +136,9 @@ def test_pinned_stack_count_expansion_and_spread() -> None:
     assert len(stack) == int(values["count"])
     assert [o.name for o in stack] == [f"cup_{k + 1}" for k in range(len(stack))]
     spacing = {round(b.x_cm - a.x_cm, 6) for a, b in pairwise(stack)}
-    assert spacing == {round(float(values["spread_cm"]), 6)}
+    # Sampled spread, clamped so 9 cm cups never interpenetrate at spawn.
+    expected = max(float(values["spread_cm"]), ASSETS["cup"].footprint_w_cm + SPREAD_CLEARANCE_CM)
+    assert spacing == {round(expected, 6)}
 
 
 def test_pinned_sort_total_count_round_robin() -> None:
@@ -272,6 +289,23 @@ def test_size_order_respects_bound_size() -> None:
 def test_size_factors_floored_above_zero() -> None:
     # A large count can never yield a zero/negative size.
     assert all(f >= SIZE_ORDER_STEP for f in _size_factors(20, "largest_first"))
+
+
+def test_expand_clamps_spread_to_footprint() -> None:
+    """A sampled spread narrower than the copies themselves cannot be honored."""
+    from kitchenbench.instances import SimObject, Var
+    from kitchenbench.sim.blueprint import _expand, _Resolver
+
+    instance = SPEC_BY_KEY["stack"].instances[0]
+    obj = SimObject(name="cup", asset="cup", role="stack", count=Var("count"), spread_cm=3.0)
+    copies = _expand(obj, _Resolver(instance, {"count": 3}))
+    # 9 cm cups at a sampled 3 cm spread -> clamped to 10 cm spacing.
+    assert [o.x_cm for o in copies] == [0.0, 10.0, 20.0]
+
+    # A spread wider than the footprint passes through unchanged.
+    wide = SimObject(name="cup", asset="cup", role="stack", count=Var("count"), spread_cm=14.0)
+    copies = _expand(wide, _Resolver(instance, {"count": 2}))
+    assert [o.x_cm for o in copies] == [0.0, 14.0]
 
 
 def test_expand_count_below_one_raises() -> None:

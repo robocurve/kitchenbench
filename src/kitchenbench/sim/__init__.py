@@ -21,6 +21,7 @@ from kitchenbench.sim.blueprint import (
 from kitchenbench.sim.success import (
     CONTACT_TOL_M,
     CONTAIN_FRACTION,
+    FOLD_MAX_HEIGHT_M,
     FOLD_RATIO_PER_FOLD,
     GRASP_RADIUS_M,
     OPEN_FRACTION,
@@ -37,6 +38,7 @@ __all__ = [
     "ASSETS",
     "CONTACT_TOL_M",
     "CONTAIN_FRACTION",
+    "FOLD_MAX_HEIGHT_M",
     "FOLD_RATIO_PER_FOLD",
     "GRASP_RADIUS_M",
     "OPEN_FRACTION",
