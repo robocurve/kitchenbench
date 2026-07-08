@@ -14,6 +14,8 @@ Built on [Inspect Robots](https://github.com/robocurve/inspect-robots) · part o
 
 </div>
 
+> **⚠️ Early alpha.** Under active development. APIs, data formats, and results may change without notice.
+
 KitchenBench is **10 kitchen-manipulation tasks** expressed as Inspect Robots `Task`s —
 embodiment-agnostic, so you run them against *any* compatible policy/embodiment.
 The set emphasizes **bimanual coordination**: pouring, lid removal, folding,
