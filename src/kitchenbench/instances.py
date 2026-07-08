@@ -61,6 +61,131 @@ class Realization:
 
 
 @dataclass(frozen=True)
+class Var:
+    """A reference to a setup variable (or static), resolved at realization time."""
+
+    name: str
+
+
+@dataclass(frozen=True)
+class SimObject:
+    """One object (or numbered family of objects) a simulator must spawn.
+
+    Placements are centimeters/degrees in the bench frame, or in the parent
+    object's frame when :attr:`parent` is set (compartments ride their tray;
+    a substance spawns inside its source vessel). A ``count`` bound to a
+    ``Var`` — and any literal ``count > 1`` — expands to ``name_1..name_n``
+    (numbered even when a sampled count resolves to 1, so names stay stable
+    across epochs) laid out deterministically: copy ``k`` (0-based) sits at
+    ``(x_cm + k * spacing, y_cm)`` where spacing is ``spread_cm`` clamped up
+    to the widest copy's nominal footprint plus a clearance, so rigid copies
+    never interpenetrate at spawn. Counts below 1 are a blueprint-time
+    error. ``split`` round-robins asset classes over the copies in declared
+    order. ``size_order`` ("largest_first"/"shuffled") maps to a documented
+    deterministic per-copy size sequence.
+    """
+
+    name: str
+    asset: str | Var
+    role: str | None = None
+    x_cm: float | Var = 0.0
+    y_cm: float | Var = 0.0
+    yaw_deg: float | Var = 0.0
+    parent: str | None = None
+    count: int | Var = 1
+    split: tuple[str, ...] = ()
+    spread_cm: float | Var = 0.0
+    size_cm: float | Var | None = None
+    size_order: Var | None = None
+    amount_g: float | Var | None = None
+
+
+@dataclass(frozen=True)
+class SimSpec:
+    """Machine-readable sim semantics for one instance (see plan 0003).
+
+    ``success`` holds per-target-kind parameters as ``(key, value)`` pairs
+    (tuple-of-pairs keeps the dataclass hashable); ``conditions`` names setup
+    variables that are physical/task conditions a simulator applies or reports
+    as unsupported. Validation enforces the **coverage invariant**: every setup
+    variable is referenced somewhere (object binding, success, or conditions),
+    and at most once among object bindings.
+    """
+
+    objects: tuple[SimObject, ...]
+    success: tuple[tuple[str, Scalar | Var], ...] = ()
+    conditions: tuple[str, ...] = ()
+
+
+#: Rig/scene names a simulator must register besides the blueprint objects.
+RESERVED_SIM_NAMES = frozenset({"gripper_left", "gripper_right", "bench"})
+
+_OBJECT_BINDING_FIELDS = (
+    "asset",
+    "x_cm",
+    "y_cm",
+    "yaw_deg",
+    "count",
+    "spread_cm",
+    "size_cm",
+    "size_order",
+    "amount_g",
+)
+
+
+def _validate_sim_spec(instance: TaskInstance) -> None:
+    """Structural validation of an instance's ``sim`` annotation (import-time)."""
+    spec = instance.sim
+    if spec is None:
+        return
+    iid = instance.instance_id
+    known = set(instance.setup) | set(instance.static)
+
+    names: set[str] = set()
+    bound: list[str] = []
+    for obj in spec.objects:
+        if obj.name in names:
+            raise ValueError(f"{iid}: duplicate sim object name {obj.name!r}")
+        names.add(obj.name)
+        for field_name in _OBJECT_BINDING_FIELDS:
+            value = getattr(obj, field_name)
+            if isinstance(value, Var):
+                if value.name not in known:
+                    raise ValueError(
+                        f"{iid}: object {obj.name!r} binds unknown variable {value.name!r}"
+                    )
+                bound.append(value.name)
+    duplicates = {name for name in bound if bound.count(name) > 1}
+    if duplicates:
+        raise ValueError(f"{iid}: variables bound by more than one object field: {duplicates}")
+
+    declared: set[str] = set()
+    for obj in spec.objects:
+        if obj.parent is not None and obj.parent not in declared | RESERVED_SIM_NAMES:
+            # Parents must be declared earlier in the tuple: typos surface at
+            # import, and cycles are unrepresentable by construction.
+            raise ValueError(f"{iid}: object {obj.name!r} has unknown parent {obj.parent!r}")
+        declared.add(obj.name)
+        if obj.split and not isinstance(obj.count, Var) and obj.count <= 1:
+            raise ValueError(f"{iid}: object {obj.name!r} has a split but no count")
+
+    success_refs = {v.name for _, v in spec.success if isinstance(v, Var)}
+    for ref in success_refs:
+        if ref not in known:
+            raise ValueError(f"{iid}: success references unknown variable {ref!r}")
+    for cond in spec.conditions:
+        if cond not in instance.setup:
+            raise ValueError(f"{iid}: condition {cond!r} is not a setup variable")
+
+    covered = set(bound) | success_refs | set(spec.conditions)
+    uncovered = set(instance.setup) - covered
+    if uncovered:
+        raise ValueError(
+            f"{iid}: setup variables not covered by the sim annotation: {sorted(uncovered)}"
+        )
+
+
+@dataclass(frozen=True)
 class TaskInstance:
     """A stochastic scenario: named distributions + a goal."""
 
@@ -71,6 +196,10 @@ class TaskInstance:
     language_vars: tuple[str, ...] = ()
     static: dict[str, Any] = field(default_factory=dict)
     validation: Validation = field(default_factory=Validation)
+    sim: SimSpec | None = None
+
+    def __post_init__(self) -> None:
+        _validate_sim_spec(self)
 
     def realize(self, seed: int) -> Realization:
         """Sample every setup variable (sorted-key order) for one concrete environment."""
