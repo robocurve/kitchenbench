@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🍳 KitchenBench
+# KitchenBench
 
-**A bimanual kitchen-manipulation benchmark for VLA models.**
+A bimanual kitchen-manipulation benchmark for VLA models.
 
 Built on [Inspect Robots](https://github.com/robocurve/inspect-robots) · part of
 [WorldEvals](https://github.com/robocurve/worldevals), the "Inspect Evals for robotics".
@@ -18,15 +18,16 @@ Built on [Inspect Robots](https://github.com/robocurve/inspect-robots) · part o
 > [!NOTE]
 > This project is in early development. The API may change between releases, so pin a version before depending on it.
 
-KitchenBench is **10 kitchen-manipulation tasks** expressed as Inspect Robots `Task`s —
-embodiment-agnostic, so you run them against *any* compatible policy/embodiment.
-The set emphasizes **bimanual coordination**: pouring, lid removal, folding,
-part-mating, a pure two-arm handover, and tool-mediated scooping, alongside
-classic pick-place / stacking / slotted insertion and a multi-instance sort.
+KitchenBench is 10 kitchen-manipulation tasks expressed as Inspect Robots `Task`s.
+They are embodiment-agnostic, so you run them against *any* compatible
+policy/embodiment. The set emphasizes bimanual coordination: pouring, lid
+removal, folding, part-mating, a pure two-arm handover, and tool-mediated
+scooping, alongside classic pick-place / stacking / slotted insertion and a
+multi-instance sort.
 
-It ships a **dependency-free mock kitchen** so the whole suite runs in CI, and is
-designed to point straight at real hardware — e.g. **YAM bimanual arms** driven by
-**MolmoAct2**.
+It ships a dependency-free mock kitchen so the whole suite runs in CI, and is
+designed to point straight at real hardware (e.g. YAM bimanual arms driven by
+MolmoAct2).
 
 ## The tasks
 
@@ -53,7 +54,7 @@ The key ideas, top-down:
 - A **task instance** is one concrete *scenario written as a distribution*: a
   **stochastic setup** (named random variables, each with a distribution) plus a
   **goal** (a natural-language success criterion that may reference the sampled
-  variables). It is *not* a single fixed scene — it is a recipe for generating many.
+  variables). It is *not* a single fixed scene. It is a recipe for generating many.
 - A **realization** is one sample of that recipe: draw every random variable from
   its distribution to get one concrete environment (and a concrete goal sentence).
 - Running a `(policy, embodiment)` pair on `K_realizations` realizations and
@@ -129,7 +130,7 @@ r.setup_lines     # ('fill_g = 156.43…', 'pour_height_cm = 9.88…', 'vessel =
 Each instance becomes one Inspect Robots `Scene`; the 5 realizations are the 5 **epochs**
 (`Epochs(count=5, reducer="mean")`), each seeded independently. Because the reducer
 is the mean, **each scene's reduced `task_success` is the instance success
-probability P̂[Yᵢ = 1]** — exactly the methodology's estimator:
+probability P̂[Yᵢ = 1]**, exactly the methodology's estimator:
 
 ```python
 from inspect_robots import eval
@@ -139,7 +140,7 @@ for s in log.samples:
 ```
 
 On real hardware an embodiment (or operator tool) calls `realize_scene(scene,
-seed)` to get the concrete setup to arrange — `Realization.setup_lines` is the
+seed)` to get the concrete setup to arrange. `Realization.setup_lines` is the
 "arrange this" checklist, and `Realization.instruction` is the goal fed to the VLA.
 
 **Distribution types** (in [`distributions.py`](src/kitchenbench/distributions.py)):
@@ -148,14 +149,14 @@ seed)` to get the concrete setup to arrange — `Realization.setup_lines` is the
 `float`/`int`/`str` (JSON-native), and `Categorical` preserves value types (an `int`
 category samples back as an `int`).
 
-> **Validation status — read before trusting the numbers.** The shipped instances
-> are **AI-authored drafts** (`Validation(source="opus-draft")`, `validated=False`).
-> The methodology's `K_i = 5` is the count *after* human validation — 3 experts
-> rating each instance on representativeness **and** quality, accepted only if both
+> **Validation status: read before trusting the numbers.** The shipped instances
+> are AI-authored drafts (`Validation(source="opus-draft")`, `validated=False`).
+> The methodology's `K_i = 5` is the count *after* human validation: 3 experts
+> rating each instance on representativeness and quality, accepted only if both
 > are ≥ 4. Run that commissioning pipeline before relying on the instances; we do
-> **not** fabricate ratings. Also note `eval()`'s task-level
-> `metrics["task_success"]` is the *mean of P̂ over instances* — a convenience
-> aggregate, **not** a methodology output (the methodology sorts the per-instance P̂
+> not fabricate ratings. Also note `eval()`'s task-level
+> `metrics["task_success"]` is the *mean of P̂ over instances*: a convenience
+> aggregate, not a methodology output (the methodology sorts the per-instance P̂
 > into quantiles and fits the pTQ / automation-halvings curves).
 
 ## Install
@@ -191,25 +192,25 @@ for s in log.samples:
 ```
 
 The mock is abstract (it models *progress toward the scene goal*, like Inspect Robots's
-`CubePick`) — its job is to exercise the pipeline and give you a template. **In the
+`CubePick`). Its job is to exercise the pipeline and give you a template. In the
 mock, success depends only on the seeded goal direction, so the sampled setup
-distributions have no causal effect** (P̂ is degenerately 1.0 for the scripted
-oracle); the distribution *content* only bites on a real embodiment. The **value is
-the task definitions**, which run unchanged on a real robot.
+distributions have no causal effect (P̂ is degenerately 1.0 for the scripted
+oracle); the distribution *content* only bites on a real embodiment. The value is
+the task definitions, which run unchanged on a real robot.
 
 ## Run it on real hardware (YAM arms + MolmoAct2)
 
-KitchenBench tasks are embodiment-agnostic. To evaluate on real **YAM bimanual
-arms** with **MolmoAct2**, provide two Inspect Robots components (e.g. in your own
+KitchenBench tasks are embodiment-agnostic. To evaluate on real YAM bimanual
+arms with MolmoAct2, provide two Inspect Robots components (e.g. in your own
 adapter package such as `robocurve/embodiments`):
 
 - a **`Policy`** wrapping MolmoAct2: `act(observation) -> ActionChunk` (the
   scene's `instruction` is fed to the VLA verbatim);
 - an **`Embodiment`** for the YAM arms: `reset`/`step`/`close`, declaring its
   action space (e.g. two 7-DoF arms + grippers) and cameras. Because there is no
-  privileged success oracle, the embodiment should turn the **operator's
-  confirmation** at episode end into `StepResult(terminated=True,
-  termination_reason="success")` (or set `record.operator_judgement`) —
+  privileged success oracle, the embodiment should turn the operator's
+  confirmation at episode end into `StepResult(terminated=True,
+  termination_reason="success")` (or set `record.operator_judgement`).
   KitchenBench's `task_success` scorer reads either. Declare the `"self_paced"`
   capability and pace the control loop inside `step()`.
 
@@ -222,10 +223,10 @@ camera/state keys) before any motion and writes an immutable `EvalLog`.
 
 ## Run it in simulation
 
-Every task instance carries a machine-readable **sim annotation** (see
+Every task instance carries a machine-readable sim annotation (see
 `plans/0003-sim-support.md`): `kitchenbench.sim` resolves it into a
 `SceneBlueprint` (what to spawn, where, with per-instance success parameters)
-and defines the benchmark's **official quantitative success criteria** per
+and defines the benchmark's official quantitative success criteria per
 target kind, so a physics simulator needs no human operator. A sim embodiment
 (Isaac Lab, MuJoCo, …):
 
@@ -247,15 +248,15 @@ checker = make_success_checker(bp, world)   # world implements WorldState (4 que
 `WorldState` is four queries any simulator can answer (`aabb`,
 `contained_fraction`, `contained_mass_g`, `opening_fraction`); the criteria
 (nesting-aware stacking, mass-targeted pouring/scooping, transfer-detecting
-handoff, …) and their thresholds are versioned as `SIM_CONTRACT_VERSION` —
-log it with your runs. Declare `supported_target_kinds` on your embodiment so
+handoff, …) and their thresholds are versioned as `SIM_CONTRACT_VERSION`.
+Log it with your runs. Declare `supported_target_kinds` on your embodiment so
 Inspect Robots gates scene realizability before any rollout. The checkers work off
 poses, not sim internals, so a pose-tracked *real* rig can reuse them too.
 
 ## Development
 
 > **Dependency changes:** after editing dependencies in `pyproject.toml`, run
-> `uv lock` and commit the updated lockfile — CI installs with
+> `uv lock` and commit the updated lockfile. CI installs with
 > `uv sync --locked` and fails with "the lockfile needs to be updated" if you
 > forget. Day-to-day conventions (PR-only `main`, the required `ci-ok` check,
 > one-click releases) are documented in [`CLAUDE.md`](CLAUDE.md).
