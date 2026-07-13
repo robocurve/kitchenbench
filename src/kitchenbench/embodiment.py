@@ -11,9 +11,10 @@ subspace. Progress advances only when a normalized action aligns with that
 direction (cosine ≥ ``align_threshold``) — so the scripted oracle (which reads the
 privileged ``goal_dir``) succeeds, while random/no-op policies do not.
 
-The action space is bimanual on purpose: ``(8,)`` = two arms x ``[dx, dy, dz,
-gripper]``. A real YAM embodiment is a higher-DoF analog (compatibility checking
-matches exact dims, so the real arm pairs with a real VLA, not with this mock).
+The action space is bimanual on purpose: ``(8,)`` = ``[left dx, dy, dz, right
+dx, dy, dz, left gripper, right gripper]`` (see ``dim_labels``). A real YAM
+embodiment is a higher-DoF analog (compatibility checking matches exact dims, so
+the real arm pairs with a real VLA, not with this mock).
 """
 
 from __future__ import annotations
@@ -40,7 +41,21 @@ _ACTION_SPACE = Box(
     shape=(8,),
     low=np.full(8, -1.0),
     high=np.full(8, 1.0),
-    semantics=ActionSemantics(control_mode="eef_delta_pos", gripper="continuous", frame="world"),
+    semantics=ActionSemantics(
+        control_mode="eef_delta_pos",
+        gripper="continuous",
+        frame="world",
+        dim_labels=(
+            "left_dx",
+            "left_dy",
+            "left_dz",
+            "right_dx",
+            "right_dy",
+            "right_dz",
+            "left_gripper",
+            "right_gripper",
+        ),
+    ),
 )
 
 

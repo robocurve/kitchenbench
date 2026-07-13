@@ -70,6 +70,33 @@ def test_embodiment_reset_exposes_goal() -> None:
     assert obs.images["overhead"].shape == (24, 24, 3)
 
 
+def test_dim_labels_match_step_consumption() -> None:
+    # The conformance kit only checks that dim_labels exist and are unique; this
+    # pins each label to the dimension step() actually consumes, so a reorder
+    # (which would silently corrupt label-addressed agent actions) fails loudly.
+    emb = KitchenEmbodiment()
+    semantics = emb.info.action_space.semantics
+    assert semantics is not None and semantics.dim_labels is not None
+    labels = list(semantics.dim_labels)
+    emb.reset(_SCENE, seed=0)
+    for label, state_key, axis in [
+        ("left_dx", "left_eef", 0),
+        ("left_dy", "left_eef", 1),
+        ("left_dz", "left_eef", 2),
+        ("right_dx", "right_eef", 0),
+        ("right_dy", "right_eef", 1),
+        ("right_dz", "right_eef", 2),
+    ]:
+        one_hot = np.zeros(8)
+        one_hot[labels.index(label)] = 1.0
+        obs = emb.step(Action(data=one_hot)).observation
+        expected = np.zeros(3)
+        expected[axis] = 1.0
+        np.testing.assert_array_equal(obs.state[state_key], expected)
+        other = "right_eef" if state_key == "left_eef" else "left_eef"
+        np.testing.assert_array_equal(obs.state[other], np.zeros(3))
+
+
 def test_embodiment_aligned_action_makes_progress_to_success() -> None:
     emb = KitchenEmbodiment()
     obs = emb.reset(_SCENE, seed=1)
