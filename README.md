@@ -31,18 +31,74 @@ MolmoAct2).
 
 ## The tasks
 
-| Task (`--task`) | Goal | Bimanual | Category |
-|---|---|:--:|---|
-| `kitchenbench/place_cutlery` | place the {cutlery} on the {dishware} | | pick-place |
-| `kitchenbench/stack` | stack the cups / bowls / plates | | stacking |
-| `kitchenbench/place_in_rack` | place the {dishware} into the dish rack | | insertion |
-| `kitchenbench/pour_pasta` | pour the dry pasta into the {vessel} | ✅ | granular |
-| `kitchenbench/open_container` | open the {container} | ✅ | articulated |
-| `kitchenbench/fold_cloth` | fold the {cloth} | ✅ | deformable |
-| `kitchenbench/seal_container` | seal the {container} with its lid | ✅ | mating |
-| `kitchenbench/handoff` | hand off the {item} from one arm to the other | ✅ | coordination |
-| `kitchenbench/sort_cutlery` | sort the cutlery into the correct tray compartments | | classification |
-| `kitchenbench/scoop_pasta` | scoop the {pasta} with the {tool} and transfer it to the container | ✅ | granular+tool |
+| Task (`--task`) | Goal | Varies over | Bimanual | Category |
+|---|---|---|:--:|---|
+| `kitchenbench/place_cutlery` | place the {cutlery} on the {dishware} | {cutlery}: spoon, fork, knife · {dishware}: plate, bowl, napkin · placement, approach angle, clutter | | pick-place |
+| `kitchenbench/stack` | stack the cups / bowls / plates | stacked item: cups, bowls, plates · count: 2 to 5 · sizes, spacing, placement jitter | | stacking |
+| `kitchenbench/place_in_rack` | place the {dishware} into the dish rack | {dishware}: plate, bowl, cup · slot, rack pose, approach tilt, slot width, friction | | insertion |
+| `kitchenbench/pour_pasta` | pour the dry pasta into the {vessel} | {vessel}: bowl, cup, pot · fill amount, pour height and angle, placement | ✅ | granular |
+| `kitchenbench/open_container` | open the {container} | {container}: jar, bottle, food container · lid torque, cap turns, tilt, size | ✅ | articulated |
+| `kitchenbench/fold_cloth` | fold the {cloth} | {cloth}: dish towel, napkin, cloth · size, fold count, crumple, rotation | ✅ | deformable |
+| `kitchenbench/seal_container` | seal the {container} with its lid | {container}: food container, pot, jar · lid offset and yaw, press force, thread turns, fit clearance | ✅ | mating |
+| `kitchenbench/handoff` | hand off the {item} from one arm to the other | {item}: utensil, cup, produce item · handoff height and position, fill level, fragility, tool length | ✅ | coordination |
+| `kitchenbench/sort_cutlery` | sort the cutlery into the correct tray compartments | spoons, forks, knives · piece count: 3 to 10 · pile spread and overlap, tray pose | | classification |
+| `kitchenbench/scoop_pasta` | scoop about {fill_target_g} g of the {pasta} with the {tool} and transfer it to the container | {pasta}: penne, rigatoni · {tool}: spoon, measuring cup · {fill_target_g}: 20 to 160 · pile depth, container distance | ✅ | granular+tool |
+
+The "Varies over" column is the union over the task's 5 instances. Each
+`{placeholder}` lists every value the goal sentence can name (an individual
+instance samples from a subset of them and fixes the rest in its goal text);
+the trailing items summarize the remaining setup variables (placement jitter,
+sizes, forces, and the like) the instances also sample, without listing every
+one. The full per-instance distributions live in
+[`specs.py`](src/kitchenbench/specs.py), and `tests/test_readme_table.py`
+keeps this table in sync with them.
+
+## Quick start
+
+Install from PyPI (uv shown, plain pip works too; `inspect-robots` comes along
+as a dependency):
+
+```bash
+uv pip install kitchenbench
+```
+
+Installing registers the 10 tasks plus a dependency-free mock kitchen (the
+`kitchen` embodiment and the `kitchen_scripted` / `kitchen_random` /
+`kitchen_noop` policies) with Inspect Robots via entry points, so everything
+below runs immediately: no hardware, no simulator, no configuration.
+
+Run one task (5 instances × 5 realizations = 25 rollouts, a few seconds on the
+mock):
+
+```bash
+inspect-robots list tasks    # the 10 kitchenbench/* tasks from the table above
+inspect-robots run --task kitchenbench/pour_pasta --policy kitchen_scripted --embodiment kitchen
+```
+
+Run the whole benchmark from Python with `eval_set`:
+
+```python
+from inspect_robots import eval_set
+
+from kitchenbench import TASK_FACTORIES
+
+ok, logs = eval_set(
+    [f"kitchenbench/{key}" for key in sorted(TASK_FACTORIES)],
+    "kitchen_scripted",
+    "kitchen",
+)
+for log in logs:
+    print(log.eval.task, log.results.metrics["task_success"])
+```
+
+The mock is abstract (it models *progress toward the scene goal*, like Inspect Robots's
+`CubePick`). Its job is to exercise the pipeline and give you a template. In the
+mock, success depends only on the seeded goal direction, so the sampled setup
+distributions have no causal effect (P̂ is degenerately 1.0 for the scripted
+oracle); the distribution *content* only bites on a real embodiment. The value is
+the task definitions, which run unchanged on a real robot: to evaluate a real
+VLA, swap in a real policy/embodiment pair (see "Run it on real hardware" and
+"Run it in simulation" below).
 
 ## Task instances & realizations
 
@@ -158,45 +214,6 @@ category samples back as an `int`).
 > `metrics["task_success"]` is the *mean of P̂ over instances*: a convenience
 > aggregate, not a methodology output (the methodology sorts the per-instance P̂
 > into quantiles and fits the pTQ / automation-halvings curves).
-
-## Install
-
-```bash
-# Both packages are on PyPI (uv recommended). Installing kitchenbench pulls in
-# inspect-robots (>= 0.6) automatically:
-uv pip install kitchenbench
-```
-
-## Run it (mock kitchen, no hardware)
-
-KitchenBench registers a dependency-free mock embodiment (`kitchen`) and policies
-(`kitchen_scripted` / `kitchen_random` / `kitchen_noop`) via entry points:
-
-```bash
-inspect-robots list tasks                       # see all kitchenbench/* tasks
-inspect-robots run --task kitchenbench/pour_pasta --policy kitchen_scripted --embodiment kitchen
-```
-
-Or in Python:
-
-```python
-from inspect_robots import eval
-
-(log,) = eval("kitchenbench/open_container", "kitchen_scripted", "kitchen")
-# Per-instance success probability P̂[Yᵢ=1] lives in each sample's reduced score:
-for s in log.samples:
-    print(s.scene_id, s.reduced["task_success"])
-# log.results.metrics["task_success"] is the mean of P̂ over instances — a
-# convenience aggregate, NOT a methodology quantity (the methodology sorts P̂ into
-# quantiles and fits pTQ / automation-halvings; out of scope here).
-```
-
-The mock is abstract (it models *progress toward the scene goal*, like Inspect Robots's
-`CubePick`). Its job is to exercise the pipeline and give you a template. In the
-mock, success depends only on the seeded goal direction, so the sampled setup
-distributions have no causal effect (P̂ is degenerately 1.0 for the scripted
-oracle); the distribution *content* only bites on a real embodiment. The value is
-the task definitions, which run unchanged on a real robot.
 
 ## Run it on real hardware (YAM arms + MolmoAct2)
 
