@@ -19,7 +19,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Typing :: Typed",
 ]
-dependencies = ["inspect-robots>=0.3", "numpy>=1.24"]
+dependencies = ["inspect-robots>=0.6", "numpy>=1.24"]
 
 [project.optional-dependencies]
 dev = [
@@ -35,8 +35,8 @@ Homepage = "https://github.com/robocurve/kitchenbench"
 Collection = "https://github.com/robocurve/worldevals"
 Framework = "https://github.com/robocurve/inspect-robots"
 
-# Inspect Robots isn't on PyPI yet — resolve it from the tagged GitHub release. This is
-# For local development against a sibling checkout, use an editable install:
+# Inspect Robots resolves from PyPI. For local development against a sibling
+# checkout, use an editable install:
 #   uv pip install -e ../inspect-robots
 # Inspect Robots discovers these by entry point — no import needed for `inspect-robots list`.
 [project.entry-points."inspect_robots.tasks"]

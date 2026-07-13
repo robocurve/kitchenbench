@@ -162,9 +162,9 @@ category samples back as an `int`).
 ## Install
 
 ```bash
-# Inspect Robots isn't on PyPI yet, so install both from GitHub (uv recommended):
-uv pip install "inspect-robots @ git+https://github.com/robocurve/inspect-robots@v0.3.0"
-uv pip install "kitchenbench @ git+https://github.com/robocurve/kitchenbench"
+# Both packages are on PyPI (uv recommended). Installing kitchenbench pulls in
+# inspect-robots (>= 0.6) automatically:
+uv pip install kitchenbench
 ```
 
 ## Run it (mock kitchen, no hardware)
@@ -262,7 +262,7 @@ poses, not sim internals, so a pose-tracked *real* rig can reuse them too.
 > one-click releases) are documented in [`CLAUDE.md`](CLAUDE.md).
 
 ```bash
-uv venv && uv pip install -e ".[dev]"     # inspect_robots resolved from the v0.3.0 tag
+uv venv && uv pip install -e ".[dev]"     # inspect-robots resolved from PyPI (>= 0.6)
 uv run pre-commit install
 uv run pytest --cov                        # 100% coverage required
 uv run ruff check . && uv run mypy

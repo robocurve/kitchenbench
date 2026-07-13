@@ -38,9 +38,9 @@ success probability **P̂[Yᵢ=1]**. Instances are AI-authored drafts
 
 ## Working here (important gotchas)
 
-- **Dependency on Inspect Robots is a git tag.** `pyproject.toml` declares
-  `inspect-robots>=0.3` with `[tool.uv.sources] inspect-robots = { git = ..., tag = "v0.3.0" }`.
-  CI uses `uv` (plain pip ignores `tool.uv.sources`). A sibling checkout exists at
+- **Dependency on Inspect Robots comes from PyPI.** `pyproject.toml` declares
+  `inspect-robots>=0.6` (0.6 is the floor for the conformance kit that
+  `tests/test_conformance.py` enforces). A sibling checkout exists at
   `../inspect-robots`; for local dev against it, override with
   `uv pip install -e ../inspect-robots`.
 - **Conda is active in this shell.** `uv pip install` targets the *active* env, so
@@ -54,10 +54,11 @@ success probability **P̂[Yᵢ=1]**. Instances are AI-authored drafts
   commit and the coverage gate on push (via `uv run`). CI (Linux+macOS ×
   py3.11/3.12) and the 100% gate are **required, blocking PR checks**.
 - **Authoring imports come from the top-level `inspect_robots` package** (its public
-  API, stable as of v0.3.0): `from inspect_robots import Task, Scene, Target, task,
+  API, stable since v0.3.0): `from inspect_robots import Task, Scene, Target, task,
   ActionChunk, ...`. Don't import from `inspect_robots.<submodule>` unless a symbol
   isn't re-exported (capability flags like `SEEDABLE` live in
-  `inspect_robots.embodiment`).
+  `inspect_robots.embodiment`; the conformance kit lives in
+  `inspect_robots.conformance`).
 
 ## Out of scope (lives elsewhere)
 
