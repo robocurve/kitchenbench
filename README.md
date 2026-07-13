@@ -47,8 +47,9 @@ MolmoAct2).
 The "Varies over" column is the union over the task's 5 instances. Each
 `{placeholder}` lists every value the goal sentence can name (an individual
 instance samples from a subset of them and fixes the rest in its goal text);
-the trailing items are the numeric setup variables (placement jitter, sizes,
-forces) the instances also sample. The full per-instance distributions live in
+the trailing items summarize the remaining setup variables (placement jitter,
+sizes, forces, and the like) the instances also sample, without listing every
+one. The full per-instance distributions live in
 [`specs.py`](src/kitchenbench/specs.py), and `tests/test_readme_table.py`
 keeps this table in sync with them.
 
