@@ -14,6 +14,7 @@ name, and the returned ``Task.name`` are all identical.
 from __future__ import annotations
 
 import re
+import zlib
 from dataclasses import asdict
 from typing import Any
 
@@ -40,15 +41,25 @@ def build_scenes(spec: TaskSpec) -> list[Scene]:
     """Build one Scene per task instance (5 per task)."""
     scenes: list[Scene] = []
     for index, inst in enumerate(spec.instances):
+        # Derive the scene seed from the instance id, not its sorted position.
+        #
+        # instance_id is "<task>/<name>" and is unique across the suite, so this
+        # decorrelates the per-instance RNG streams. Seeding on `index` gave
+        # instance i of EVERY task a byte-identical PCG64 stream (derive_seed
+        # hashes only (eval_seed, scene_seed, epoch) -- task identity never
+        # entered the payload), so same-shaped distributions at the same sorted
+        # position realized the SAME number across tasks.
+        scene_seed = zlib.crc32(inst.instance_id.encode()) & 0xFFFFFFFF
         # The displayed instruction is the realization of epoch 0 under the default
-        # eval(seed=0), so it equals the first actual rollout's instruction.
-        canonical = inst.realize(derive_seed(0, index, 0))
+        # eval(seed=0), so it equals the first actual rollout's instruction. It has
+        # to use the same scene seed the Scene carries, or the two drift apart.
+        canonical = inst.realize(derive_seed(0, scene_seed, 0))
         scenes.append(
             Scene(
                 id=_slug(inst.instance_id),
                 instruction=canonical.instruction,
                 target=Target(kind=inst.target_kind, spec=dict(inst.static)),
-                init_seed=index,
+                init_seed=scene_seed,
                 metadata={
                     "benchmark": "kitchenbench",
                     "task": spec.key,

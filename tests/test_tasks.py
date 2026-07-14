@@ -57,7 +57,10 @@ def test_scene_metadata_is_json_native() -> None:
 def test_canonical_instruction_matches_epoch_zero() -> None:
     spec = SPEC_BY_KEY["pour_pasta"]
     for index, scene in enumerate(build_scenes(spec)):
-        expected = spec.instances[index].realize(derive_seed(0, index, 0)).instruction
+        # Read the seed off the Scene rather than re-deriving it, so this test
+        # pins the INVARIANT (displayed instruction == epoch-0 realization) and
+        # not a particular seeding scheme.
+        expected = spec.instances[index].realize(derive_seed(0, scene.init_seed, 0)).instruction
         assert scene.instruction == expected
 
 
