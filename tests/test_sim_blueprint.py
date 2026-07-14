@@ -44,7 +44,9 @@ def _all_scene_seed_pairs() -> list[tuple[str, object, int]]:
     for spec in SPEC_BY_KEY.values():
         for index, scene in enumerate(build_scenes(spec)):
             for epoch in range(3):
-                pairs.append((f"{spec.key}[{index}]e{epoch}", scene, derive_seed(0, index, epoch)))
+                pairs.append(
+                    (f"{spec.key}[{index}]e{epoch}", scene, derive_seed(0, scene.init_seed, epoch))
+                )
     return pairs
 
 
@@ -208,7 +210,7 @@ def test_pinned_handoff_receiving_arms() -> None:
 
 def test_pinned_size_order_mixed_sizes_both_orders() -> None:
     scene = _scene("stack", 3)  # mixed-sizes: size_order sampled
-    # Epoch 0 samples "largest_first", epoch 1 samples "shuffled" (pinned).
+    # These fixed seeds sample "largest_first" and "shuffled" (pinned).
     seed_first = derive_seed(0, 3, 0)
     values_first = realize_scene(scene, seed_first).values  # type: ignore[arg-type]
     assert values_first["size_order"] == "largest_first"

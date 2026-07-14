@@ -34,7 +34,7 @@ class TaskSpec:
     bimanual: bool
     max_steps: int
     instances: tuple[TaskInstance, ...]
-    version: str = "2"
+    version: str = "1"
     description: str = ""
 
 
@@ -1341,6 +1341,7 @@ SPECS: tuple[TaskSpec, ...] = (
         bimanual=False,
         max_steps=60,
         instances=_PLACE_CUTLERY,
+        version="2",
         description="Pick a single piece of cutlery and place it on a target surface.",
     ),
     TaskSpec(
@@ -1350,6 +1351,7 @@ SPECS: tuple[TaskSpec, ...] = (
         bimanual=False,
         max_steps=80,
         instances=_STACK,
+        version="2",
         description="Stack multiple like items into a single neat stack.",
     ),
     TaskSpec(
@@ -1359,6 +1361,7 @@ SPECS: tuple[TaskSpec, ...] = (
         bimanual=False,
         max_steps=80,
         instances=_PLACE_IN_RACK,
+        version="2",
         description="Drop a dish into the correct slot of a dish rack.",
     ),
     TaskSpec(
@@ -1368,6 +1371,7 @@ SPECS: tuple[TaskSpec, ...] = (
         bimanual=True,
         max_steps=100,
         instances=_POUR_PASTA,
+        version="2",
         description="Pour dry pasta into a receiving vessel; one arm steadies, the other pours.",
     ),
     TaskSpec(
@@ -1377,6 +1381,7 @@ SPECS: tuple[TaskSpec, ...] = (
         bimanual=True,
         max_steps=120,
         instances=_OPEN_CONTAINER,
+        version="2",
         description="Remove or unscrew a lid — one arm braces while the other twists or pries.",
     ),
     TaskSpec(
@@ -1386,6 +1391,7 @@ SPECS: tuple[TaskSpec, ...] = (
         bimanual=True,
         max_steps=120,
         instances=_FOLD_CLOTH,
+        version="2",
         description="Deformable manipulation: grasp opposite corners and manage slack.",
     ),
     TaskSpec(
@@ -1395,6 +1401,7 @@ SPECS: tuple[TaskSpec, ...] = (
         bimanual=True,
         max_steps=120,
         instances=_SEAL_CONTAINER,
+        version="2",
         description="Align and press-or-twist a matching lid onto a base while one arm holds it.",
     ),
     TaskSpec(
@@ -1404,6 +1411,7 @@ SPECS: tuple[TaskSpec, ...] = (
         bimanual=True,
         max_steps=80,
         instances=_HANDOFF,
+        version="2",
         description="A pure handover that a single arm cannot do — the must-use-both-arms anchor.",
     ),
     TaskSpec(
@@ -1413,6 +1421,7 @@ SPECS: tuple[TaskSpec, ...] = (
         bimanual=False,
         max_steps=200,
         instances=_SORT_CUTLERY,
+        version="2",
         description="Sort a mixed pile into spoon/fork/knife compartments — multi-instance.",
     ),
     TaskSpec(
