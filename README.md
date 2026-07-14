@@ -9,8 +9,10 @@ Built on [Inspect Robots](https://github.com/robocurve/inspect-robots) · part o
 
 ![Status: alpha](https://img.shields.io/badge/status-alpha-blue)
 [![CI](https://github.com/robocurve/kitchenbench/actions/workflows/ci.yml/badge.svg)](https://github.com/robocurve/kitchenbench/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-task%20reference-indigo)](https://robocurve.github.io/kitchenbench/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/robocurve/kitchenbench/actions/workflows/ci.yml)
+[![Docs coverage](https://img.shields.io/badge/public%20docstrings-100%25-brightgreen)](https://github.com/robocurve/kitchenbench/actions/workflows/ci.yml)
 [![Built on Inspect Robots](https://img.shields.io/badge/built%20on-Inspect%20Robots-indigo)](https://github.com/robocurve/inspect-robots)
 
 </div>
@@ -42,7 +44,60 @@ MolmoAct2).
 | `kitchenbench/seal_container` | seal the {container} with its lid | ✅ | mating |
 | `kitchenbench/handoff` | hand off the {item} from one arm to the other | ✅ | coordination |
 | `kitchenbench/sort_cutlery` | sort the cutlery into the correct tray compartments | | classification |
-| `kitchenbench/scoop_pasta` | scoop the {pasta} with the {tool} and transfer it to the container | ✅ | granular+tool |
+| `kitchenbench/scoop_pasta` | scoop about {fill_target_g} g of the {pasta} with the {tool} and transfer it to the container | ✅ | granular+tool |
+
+> [!NOTE]
+> Every value each task varies over (the objects a `{placeholder}` can name,
+> counts, forces, placement jitter) is documented in the task reference on the
+> [KitchenBench docs site](https://robocurve.github.io/kitchenbench/). The
+> per-instance distributions live in [`specs.py`](src/kitchenbench/specs.py).
+
+## Quick start
+
+Install from PyPI (uv shown, plain pip works too; `inspect-robots` comes along
+as a dependency):
+
+```bash
+uv pip install kitchenbench
+```
+
+Installing registers the 10 tasks plus a dependency-free mock kitchen (the
+`kitchen` embodiment and the `kitchen_scripted` / `kitchen_random` /
+`kitchen_noop` policies) with Inspect Robots via entry points, so everything
+below runs immediately: no hardware, no simulator, no configuration.
+
+Run one task (5 instances × 5 realizations = 25 rollouts, a few seconds on the
+mock):
+
+```bash
+inspect-robots list tasks    # the 10 kitchenbench/* tasks from the table above
+inspect-robots run --task kitchenbench/pour_pasta --policy kitchen_scripted --embodiment kitchen
+```
+
+Run the whole benchmark from Python with `eval_set`:
+
+```python
+from inspect_robots import eval_set
+
+from kitchenbench import TASK_FACTORIES
+
+ok, logs = eval_set(
+    [f"kitchenbench/{key}" for key in sorted(TASK_FACTORIES)],
+    "kitchen_scripted",
+    "kitchen",
+)
+for log in logs:
+    print(log.eval.task, log.results.metrics["task_success"])
+```
+
+The mock is abstract (it models *progress toward the scene goal*, like Inspect Robots's
+`CubePick`). Its job is to exercise the pipeline and give you a template. In the
+mock, success depends only on the seeded goal direction, so the sampled setup
+distributions have no causal effect (P̂ is degenerately 1.0 for the scripted
+oracle); the distribution *content* only bites on a real embodiment. The value is
+the task definitions, which run unchanged on a real robot: to evaluate a real
+VLA, swap in a real policy/embodiment pair (see "Run it on real hardware" and
+"Run it in simulation" below).
 
 ## Task instances & realizations
 
@@ -159,45 +214,6 @@ category samples back as an `int`).
 > aggregate, not a methodology output (the methodology sorts the per-instance P̂
 > into quantiles and fits the pTQ / automation-halvings curves).
 
-## Install
-
-```bash
-# Both packages are on PyPI (uv recommended). Installing kitchenbench pulls in
-# inspect-robots (>= 0.6) automatically:
-uv pip install kitchenbench
-```
-
-## Run it (mock kitchen, no hardware)
-
-KitchenBench registers a dependency-free mock embodiment (`kitchen`) and policies
-(`kitchen_scripted` / `kitchen_random` / `kitchen_noop`) via entry points:
-
-```bash
-inspect-robots list tasks                       # see all kitchenbench/* tasks
-inspect-robots run --task kitchenbench/pour_pasta --policy kitchen_scripted --embodiment kitchen
-```
-
-Or in Python:
-
-```python
-from inspect_robots import eval
-
-(log,) = eval("kitchenbench/open_container", "kitchen_scripted", "kitchen")
-# Per-instance success probability P̂[Yᵢ=1] lives in each sample's reduced score:
-for s in log.samples:
-    print(s.scene_id, s.reduced["task_success"])
-# log.results.metrics["task_success"] is the mean of P̂ over instances — a
-# convenience aggregate, NOT a methodology quantity (the methodology sorts P̂ into
-# quantiles and fits pTQ / automation-halvings; out of scope here).
-```
-
-The mock is abstract (it models *progress toward the scene goal*, like Inspect Robots's
-`CubePick`). Its job is to exercise the pipeline and give you a template. In the
-mock, success depends only on the seeded goal direction, so the sampled setup
-distributions have no causal effect (P̂ is degenerately 1.0 for the scripted
-oracle); the distribution *content* only bites on a real embodiment. The value is
-the task definitions, which run unchanged on a real robot.
-
 ## Run it on real hardware (YAM arms + MolmoAct2)
 
 KitchenBench tasks are embodiment-agnostic. To evaluate on real YAM bimanual
@@ -267,6 +283,9 @@ uv run pre-commit install
 uv run pytest --cov                        # 100% coverage required
 uv run ruff check . && uv run mypy
 ```
+
+Every public module, class, and function needs a docstring, enforced by Ruff D1;
+state the contract instead of restating the symbol name.
 
 ## Citation
 

@@ -31,9 +31,13 @@ Scalar = float | int | str
 class Distribution(Protocol):
     """A sampleable, self-describing setup variable."""
 
-    def sample(self, rng: np.random.Generator) -> Scalar: ...
+    def sample(self, rng: np.random.Generator) -> Scalar:
+        """Draw one JSON-native scalar from the distribution."""
+        ...
 
-    def describe(self) -> str: ...
+    def describe(self) -> str:
+        """Render the distribution in physical-automation methodology notation."""
+        ...
 
 
 @dataclass(frozen=True)
@@ -48,9 +52,11 @@ class Uniform:
     high: float
 
     def sample(self, rng: np.random.Generator) -> float:
+        """Draw a builtin float using NumPy's half-open interval convention."""
         return float(rng.uniform(self.low, self.high))
 
     def describe(self) -> str:
+        """Render the closed-interval notation used by the methodology."""
         return f"Uniform[{_num(self.low)}, {_num(self.high)}]"
 
 
@@ -77,6 +83,7 @@ class Categorical:
                 raise ValueError("weights must sum to a positive value")
 
     def sample(self, rng: np.random.Generator) -> Scalar:
+        """Draw by index so mixed-category scalar types are preserved."""
         probs = None if self.weights is None else np.asarray(self.weights, dtype=np.float64)
         if probs is not None:
             probs = probs / probs.sum()
@@ -84,6 +91,7 @@ class Categorical:
         return self.values[idx]
 
     def describe(self) -> str:
+        """Render the finite support and optional weights in methodology notation."""
         body = ", ".join(_num(v) if isinstance(v, int | float) else str(v) for v in self.values)
         if self.weights is None:
             return f"Categorical({{{body}}})"
@@ -99,9 +107,11 @@ class Normal:
     std: float
 
     def sample(self, rng: np.random.Generator) -> float:
+        """Draw a builtin float from the configured Gaussian."""
         return float(rng.normal(self.mean, self.std))
 
     def describe(self) -> str:
+        """Render mean and variance notation from the configured standard deviation."""
         return f"N({_num(self.mean)}, {_num(self.std)}²)"
 
 
@@ -112,9 +122,11 @@ class Constant:
     value: Scalar
 
     def sample(self, rng: np.random.Generator) -> Scalar:
+        """Return the fixed value without consuming randomness."""
         return self.value
 
     def describe(self) -> str:
+        """Render the fixed value as a Python literal."""
         return repr(self.value)
 
 

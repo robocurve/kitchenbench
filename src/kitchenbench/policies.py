@@ -45,9 +45,11 @@ class ScriptedKitchenPolicy:
         self.config = PolicyConfig(action_horizon=chunk_size)
 
     def reset(self, scene: Scene) -> None:
+        """Clear inference accounting for a new scene."""
         self.num_inferences = 0
 
     def act(self, observation: Observation) -> ActionChunk:
+        """Use the privileged goal direction to emit one aligned action chunk."""
         self.num_inferences += 1
         goal = np.asarray(observation.state["goal_dir"], dtype=np.float64)
         data = np.concatenate([goal, np.array([1.0, 1.0])])  # arms aligned; grippers closed
@@ -67,11 +69,13 @@ class RandomKitchenPolicy:
         self.config = PolicyConfig(action_horizon=chunk_size)
 
     def reset(self, scene: Scene) -> None:
+        """Start the next scene's deterministic per-reset random stream."""
         self._rng = np.random.RandomState(self._base_seed + self._reset_count)
         self._reset_count += 1
         self.num_inferences = 0
 
     def act(self, observation: Observation) -> ActionChunk:
+        """Draw one open-loop chunk from the current scene's random stream."""
         self.num_inferences += 1
         actions = [
             Action(data=self._rng.uniform(-1.0, 1.0, size=8)) for _ in range(self.chunk_size)
@@ -89,8 +93,10 @@ class NoopKitchenPolicy:
         self.config = PolicyConfig(action_horizon=chunk_size)
 
     def reset(self, scene: Scene) -> None:
+        """Clear inference accounting for a new scene."""
         self.num_inferences = 0
 
     def act(self, observation: Observation) -> ActionChunk:
+        """Emit a zero-filled chunk with the configured horizon."""
         self.num_inferences += 1
         return ActionChunk(actions=[Action(data=np.zeros(8)) for _ in range(self.chunk_size)])

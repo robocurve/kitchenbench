@@ -93,6 +93,7 @@ class KitchenEmbodiment:
         )
 
     def reset(self, scene: Scene, *, seed: int | None = None) -> Observation:
+        """Seed the hidden goal and expose the scene's per-epoch instruction."""
         self._rng = np.random.RandomState(seed if seed is not None else 0)
         goal = self._rng.normal(size=6)
         self._goal = goal / (np.linalg.norm(goal) or 1.0)
@@ -112,6 +113,7 @@ class KitchenEmbodiment:
         return self._observe()
 
     def step(self, action: Action) -> StepResult:
+        """Advance progress when the dual-arm command aligns with the hidden goal."""
         self.num_steps += 1
         data = np.clip(np.asarray(action.data, dtype=np.float64), -1.0, 1.0)
         self._last = data
@@ -132,6 +134,7 @@ class KitchenEmbodiment:
         )
 
     def close(self) -> None:
+        """Release no resources because the mock has no external state."""
         return None
 
     def _observe(self) -> Observation:
