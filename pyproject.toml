@@ -29,9 +29,14 @@ dev = [
     "mypy>=1.11",
     "pre-commit>=3.5",
 ]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+]
 
 [project.urls]
 Homepage = "https://github.com/robocurve/kitchenbench"
+Documentation = "https://robocurve.github.io/kitchenbench/"
 Collection = "https://github.com/robocurve/worldevals"
 Framework = "https://github.com/robocurve/inspect-robots"
 
