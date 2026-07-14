@@ -30,7 +30,9 @@ dev = [
     "pre-commit>=3.5",
 ]
 docs = [
-    "mkdocs>=1.6",
+    # <2: MkDocs 2.0 removes the plugin/theming systems with no migration path
+    # (see the Material team's 2026-02 notice); a lock upgrade must not pull it.
+    "mkdocs>=1.6,<2",
     "mkdocs-material>=9.5",
 ]
 
