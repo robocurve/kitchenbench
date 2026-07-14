@@ -34,7 +34,7 @@ class TaskSpec:
     bimanual: bool
     max_steps: int
     instances: tuple[TaskInstance, ...]
-    version: str = "1"
+    version: str = "2"
     description: str = ""
 
 
@@ -1422,7 +1422,7 @@ SPECS: tuple[TaskSpec, ...] = (
         bimanual=True,
         max_steps=120,
         instances=_SCOOP_PASTA,
-        version="2",
+        version="3",
         description="Tool-mediated granular handling: manage fill level, then transfer.",
     ),
 )
