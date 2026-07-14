@@ -34,7 +34,16 @@ success probability **P̂[Yᵢ=1]**. Instances are AI-authored drafts
   task-instance/distribution model (read before changing the task set, the
   distributions, or the 5×5 defaults).
 - `reference/` — read-only local copy of the methodology PDFs (gitignored).
-- `README.md` — the task table + how to run on the mock and on YAM/MolmoAct2.
+- `README.md` — the task table (goal/bimanual/category) + how to run on the
+  mock and on YAM/MolmoAct2. The full "Varies over" task detail lives on the
+  docs site, not here.
+- `docs/` + `mkdocs.yml` — the docs site
+  (https://robocurve.github.io/kitchenbench/, mkdocs-material, deployed from
+  main by `.github/workflows/docs.yml`; Pages source is "GitHub Actions").
+  `docs/index.md` holds the full task table including the "Varies over"
+  column; `tests/test_docs_table.py` is its drift guard against `specs.py`.
+  The strict docs build runs inside ci.yml's quality job (so it gates merges
+  via `ci-ok`) as well as in docs.yml. Docs deps are the `docs` extra.
 
 ## Working here (important gotchas)
 
