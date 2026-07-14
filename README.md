@@ -12,6 +12,7 @@ Built on [Inspect Robots](https://github.com/robocurve/inspect-robots) · part o
 [![Docs](https://img.shields.io/badge/docs-task%20reference-indigo)](https://robocurve.github.io/kitchenbench/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/robocurve/kitchenbench/actions/workflows/ci.yml)
+[![Docs coverage](https://img.shields.io/badge/public%20docstrings-100%25-brightgreen)](https://github.com/robocurve/kitchenbench/actions/workflows/ci.yml)
 [![Built on Inspect Robots](https://img.shields.io/badge/built%20on-Inspect%20Robots-indigo)](https://github.com/robocurve/inspect-robots)
 
 </div>
