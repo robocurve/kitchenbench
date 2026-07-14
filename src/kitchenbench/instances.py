@@ -42,6 +42,7 @@ class Validation:
 
     @property
     def validated(self) -> bool:
+        """Whether the ratings meet the methodology's expert count and accept threshold."""
         return (
             len(self.representativeness) >= K_EXPERTS
             and len(self.quality) >= K_EXPERTS

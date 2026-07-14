@@ -62,6 +62,8 @@ success probability **P̂[Yᵢ=1]**. Instances are AI-authored drafts
   (strict), `pytest --cov` at **100% coverage**. Pre-commit runs ruff+mypy on
   commit and the coverage gate on push (via `uv run`). CI (Linux+macOS ×
   py3.11/3.12) and the 100% gate are **required, blocking PR checks**.
+  Every public module, class, and function needs a docstring, enforced by Ruff
+  D1; state the contract instead of restating the symbol name.
 - **Authoring imports come from the top-level `inspect_robots` package** (its public
   API, stable since v0.3.0): `from inspect_robots import Task, Scene, Target, task,
   ActionChunk, ...`. Don't import from `inspect_robots.<submodule>` unless a symbol

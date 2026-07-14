@@ -112,51 +112,61 @@ def make_task(spec: TaskSpec) -> Task:
 
 @task("kitchenbench/place_cutlery")
 def place_cutlery() -> Task:
+    """Build the registered cutlery placement task from its stochastic instances."""
     return make_task(SPEC_BY_KEY["place_cutlery"])
 
 
 @task("kitchenbench/stack")
 def stack() -> Task:
+    """Build the registered dishware stacking task from its stochastic instances."""
     return make_task(SPEC_BY_KEY["stack"])
 
 
 @task("kitchenbench/place_in_rack")
 def place_in_rack() -> Task:
+    """Build the registered rack insertion task from its stochastic instances."""
     return make_task(SPEC_BY_KEY["place_in_rack"])
 
 
 @task("kitchenbench/pour_pasta")
 def pour_pasta() -> Task:
+    """Build the registered granular pouring task from its stochastic instances."""
     return make_task(SPEC_BY_KEY["pour_pasta"])
 
 
 @task("kitchenbench/open_container")
 def open_container() -> Task:
+    """Build the registered container opening task from its stochastic instances."""
     return make_task(SPEC_BY_KEY["open_container"])
 
 
 @task("kitchenbench/fold_cloth")
 def fold_cloth() -> Task:
+    """Build the registered cloth folding task from its stochastic instances."""
     return make_task(SPEC_BY_KEY["fold_cloth"])
 
 
 @task("kitchenbench/seal_container")
 def seal_container() -> Task:
+    """Build the registered lid sealing task from its stochastic instances."""
     return make_task(SPEC_BY_KEY["seal_container"])
 
 
 @task("kitchenbench/handoff")
 def handoff() -> Task:
+    """Build the registered two-arm handoff task from its stochastic instances."""
     return make_task(SPEC_BY_KEY["handoff"])
 
 
 @task("kitchenbench/sort_cutlery")
 def sort_cutlery() -> Task:
+    """Build the registered cutlery sorting task from its stochastic instances."""
     return make_task(SPEC_BY_KEY["sort_cutlery"])
 
 
 @task("kitchenbench/scoop_pasta")
 def scoop_pasta() -> Task:
+    """Build the registered measured scooping task from its stochastic instances."""
     return make_task(SPEC_BY_KEY["scoop_pasta"])
 
 
