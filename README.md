@@ -283,6 +283,9 @@ uv run pytest --cov                        # 100% coverage required
 uv run ruff check . && uv run mypy
 ```
 
+Every public module, class, and function needs a docstring, enforced by Ruff D1;
+state the contract instead of restating the symbol name.
+
 ## Citation
 
 If you use KitchenBench in your research, please cite it:

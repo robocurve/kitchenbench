@@ -71,6 +71,8 @@ class WorldState(Protocol):
 
 @dataclass(frozen=True)
 class Verdict:
+    """Result of a quantitative check, paired with a human-readable reason."""
+
     success: bool
     explanation: str
 

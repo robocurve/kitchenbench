@@ -124,6 +124,7 @@ class SceneBlueprint:
     values: Mapping[str, Scalar]
 
     def object_names(self) -> tuple[str, ...]:
+        """Return the object names in spawn order."""
         return tuple(obj.name for obj in self.objects)
 
 
