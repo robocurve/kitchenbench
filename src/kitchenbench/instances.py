@@ -60,6 +60,16 @@ class Realization:
     instruction: str
     setup_lines: tuple[str, ...]
 
+    def __hash__(self) -> int:
+        """Compute a hash of the realization, converting dict to a sorted items tuple."""
+        return hash((
+            self.seed,
+            tuple(sorted(self.values.items())),
+            self.instruction,
+            self.setup_lines,
+        ))
+
+
 
 @dataclass(frozen=True)
 class Var:
@@ -215,3 +225,16 @@ class TaskInstance:
     def setup_spec(self) -> dict[str, str]:
         """A JSON-native description of the setup (``{var: distribution.describe()}``)."""
         return {key: self.setup[key].describe() for key in sorted(self.setup)}
+
+    def __hash__(self) -> int:
+        """Compute a hash of the instance, converting dict fields to sorted items tuples."""
+        return hash((
+            self.instance_id,
+            self.goal,
+            tuple(sorted(self.setup.items())),
+            self.target_kind,
+            self.language_vars,
+            tuple(sorted(self.static.items())),
+            self.validation,
+            self.sim,
+        ))
