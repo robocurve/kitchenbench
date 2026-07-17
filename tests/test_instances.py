@@ -118,4 +118,3 @@ def test_instances_and_realizations_are_hashable() -> None:
     assert hash(spec) is not None
     s_spec = {spec}
     assert spec in s_spec
-
