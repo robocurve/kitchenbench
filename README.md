@@ -47,6 +47,11 @@ MolmoAct2).
 | `kitchenbench/scoop_pasta` | scoop about {fill_target_g} g of the {pasta} with the {tool} and transfer it to the container | ✅ | granular+tool |
 
 > [!NOTE]
+> **KitchenBench-Lite:** `place_cutlery`, `stack`, `place_in_rack`,
+> `open_container`, and `scoop_pasta` together form KitchenBench-Lite, a
+> five-task subset of the full benchmark.
+
+> [!NOTE]
 > Every value each task varies over (the objects a `{placeholder}` can name,
 > counts, forces, placement jitter) is documented in the task reference on the
 > [KitchenBench docs site](https://robocurve.github.io/kitchenbench/). The
