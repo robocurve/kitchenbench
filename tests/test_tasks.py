@@ -67,6 +67,10 @@ def test_canonical_instruction_matches_epoch_zero() -> None:
 def test_make_task_has_two_scorers() -> None:
     task = make_task(SPECS[0])
     assert {s.name for s in task.scorers} == {"task_success", "episode_length"}
+    assert task.max_seconds == 60.0
+    assert task.max_steps is None
+    assert task.resolve_envelope(10.0).max_steps == 600
+    assert task.resolve_envelope(15.0).max_steps == 900
     assert task.metadata["k_instances"] == 5
     assert task.metadata["k_realizations"] == 5
 

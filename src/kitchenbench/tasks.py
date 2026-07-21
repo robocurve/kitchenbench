@@ -102,12 +102,12 @@ def realize_scene(scene: Scene, seed: int | None) -> Realization:
 
 
 def make_task(spec: TaskSpec) -> Task:
-    """Assemble a Inspect Robots :class:`~inspect_robots.Task` from a :class:`TaskSpec`."""
+    """Assemble an Inspect Robots :class:`~inspect_robots.Task` from a :class:`TaskSpec`."""
     return Task(
         name=f"kitchenbench/{spec.key}",
         scenes=build_scenes(spec),
         scorer=[task_success(), episode_length()],
-        max_steps=spec.max_steps,
+        max_seconds=spec.max_seconds,
         epochs=Epochs(count=K_REALIZATIONS, reducer="mean"),
         metadata={
             "title": spec.title,

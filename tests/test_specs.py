@@ -35,6 +35,11 @@ def test_each_task_has_k_instances() -> None:
         assert len(spec.instances) == K_INSTANCES, spec.key
 
 
+def test_max_seconds_positive() -> None:
+    for spec in SPECS:
+        assert spec.max_seconds > 0.0, spec.key
+
+
 def test_language_vars_and_placeholders_consistent() -> None:
     for spec in SPECS:
         for inst in spec.instances:

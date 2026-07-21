@@ -323,7 +323,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -380,16 +380,16 @@ wheels = [
 
 [[package]]
 name = "inspect-robots"
-version = "0.6.0"
+version = "0.36.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
     { name = "numpy", version = "2.5.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/84/03/4149c307e5fdebd2986ada9e0497ce13c7685f122148dbf5b8ac7444625b/inspect_robots-0.6.0.tar.gz", hash = "sha256:d654b50506fc6f8459521c0d7ac0a718d580bf2114074259b872de9236d9f399", size = 110399, upload-time = "2026-07-10T06:34:33.651Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4e/c8/9d4c3037eaef7b3ca96f9b635536d6874224c982d6e8644ad39f96e43944/inspect_robots-0.36.0.tar.gz", hash = "sha256:0b763a3fe25ff71796d4be852406cd54343ab14ea34079e514cd1ecf6787de9a", size = 372086, upload-time = "2026-08-02T00:33:26.111Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3a/5c/03b8dc5caf3f50194e44c01a00d608273b20597d4331f88464f71bfa441b/inspect_robots-0.6.0-py3-none-any.whl", hash = "sha256:ecb3a8c6f6c47f7b562b58c0cc1cfb5480229f7695967396fb970ada8ae5ac9c", size = 67025, upload-time = "2026-07-10T06:34:32.41Z" },
+    { url = "https://files.pythonhosted.org/packages/48/41/27ff83e71c94740e5bd65ab6362c04b2ea4cf1d8669d2d575d1959dad1c9/inspect_robots-0.36.0-py3-none-any.whl", hash = "sha256:90b39383523e1414cec92a38a8112cd6d8e133a0174339baa8e2be6fe351a941", size = 148362, upload-time = "2026-08-02T00:33:24.72Z" },
 ]
 
 [[package]]
@@ -458,7 +458,7 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "inspect-robots", specifier = ">=0.6" },
+    { name = "inspect-robots", specifier = ">=0.18" },
     { name = "jsonschema", marker = "extra == 'dev'", specifier = ">=4.21" },
     { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.6,<2" },
     { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.5" },
