@@ -26,13 +26,20 @@ from kitchenbench.instances import SimObject, SimSpec, TaskInstance, Var
 
 @dataclass(frozen=True)
 class TaskSpec:
-    """One KitchenBench task and its (distribution-based) task instances."""
+    """One KitchenBench task and its (distribution-based) task instances.
+
+    ``max_seconds`` is the task's real-world physical completion time budget in seconds,
+    ranging from 60s for simple pick-and-place up to 200s for multi-item sorting, derived
+    from the physical-automation methodology. ``max_steps`` is the mock-scale step limit
+    retained for backward compatibility and to bound abstract mock-world evaluation.
+    """
 
     key: str
     title: str
     category: str
     bimanual: bool
     max_steps: int
+    max_seconds: float
     instances: tuple[TaskInstance, ...]
     version: str = "1"
     description: str = ""
@@ -1340,8 +1347,9 @@ SPECS: tuple[TaskSpec, ...] = (
         category="pick_place",
         bimanual=False,
         max_steps=60,
+        max_seconds=60.0,
         instances=_PLACE_CUTLERY,
-        version="2",
+        version="3",
         description="Pick a single piece of cutlery and place it on a target surface.",
     ),
     TaskSpec(
@@ -1350,8 +1358,9 @@ SPECS: tuple[TaskSpec, ...] = (
         category="stacking",
         bimanual=False,
         max_steps=80,
+        max_seconds=80.0,
         instances=_STACK,
-        version="2",
+        version="3",
         description="Stack multiple like items into a single neat stack.",
     ),
     TaskSpec(
@@ -1360,8 +1369,9 @@ SPECS: tuple[TaskSpec, ...] = (
         category="insertion",
         bimanual=False,
         max_steps=80,
+        max_seconds=80.0,
         instances=_PLACE_IN_RACK,
-        version="2",
+        version="3",
         description="Drop a dish into the correct slot of a dish rack.",
     ),
     TaskSpec(
@@ -1370,8 +1380,9 @@ SPECS: tuple[TaskSpec, ...] = (
         category="granular",
         bimanual=True,
         max_steps=100,
+        max_seconds=100.0,
         instances=_POUR_PASTA,
-        version="2",
+        version="3",
         description="Pour dry pasta into a receiving vessel; one arm steadies, the other pours.",
     ),
     TaskSpec(
@@ -1380,8 +1391,9 @@ SPECS: tuple[TaskSpec, ...] = (
         category="articulated",
         bimanual=True,
         max_steps=120,
+        max_seconds=120.0,
         instances=_OPEN_CONTAINER,
-        version="2",
+        version="3",
         description="Remove or unscrew a lid — one arm braces while the other twists or pries.",
     ),
     TaskSpec(
@@ -1390,8 +1402,9 @@ SPECS: tuple[TaskSpec, ...] = (
         category="deformable",
         bimanual=True,
         max_steps=120,
+        max_seconds=120.0,
         instances=_FOLD_CLOTH,
-        version="2",
+        version="3",
         description="Deformable manipulation: grasp opposite corners and manage slack.",
     ),
     TaskSpec(
@@ -1400,8 +1413,9 @@ SPECS: tuple[TaskSpec, ...] = (
         category="mating",
         bimanual=True,
         max_steps=120,
+        max_seconds=120.0,
         instances=_SEAL_CONTAINER,
-        version="2",
+        version="3",
         description="Align and press-or-twist a matching lid onto a base while one arm holds it.",
     ),
     TaskSpec(
@@ -1410,8 +1424,9 @@ SPECS: tuple[TaskSpec, ...] = (
         category="coordination",
         bimanual=True,
         max_steps=80,
+        max_seconds=80.0,
         instances=_HANDOFF,
-        version="2",
+        version="3",
         description="A pure handover that a single arm cannot do — the must-use-both-arms anchor.",
     ),
     TaskSpec(
@@ -1420,8 +1435,9 @@ SPECS: tuple[TaskSpec, ...] = (
         category="classification",
         bimanual=False,
         max_steps=200,
+        max_seconds=200.0,
         instances=_SORT_CUTLERY,
-        version="2",
+        version="3",
         description="Sort a mixed pile into spoon/fork/knife compartments — multi-instance.",
     ),
     TaskSpec(
@@ -1430,8 +1446,9 @@ SPECS: tuple[TaskSpec, ...] = (
         category="granular_tool",
         bimanual=True,
         max_steps=120,
+        max_seconds=120.0,
         instances=_SCOOP_PASTA,
-        version="3",
+        version="4",
         description="Tool-mediated granular handling: manage fill level, then transfer.",
     ),
 )

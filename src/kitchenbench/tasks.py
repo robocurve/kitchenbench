@@ -115,6 +115,7 @@ def make_task(spec: TaskSpec) -> Task:
             "bimanual": spec.bimanual,
             "version": spec.version,
             "description": spec.description,
+            "max_seconds": spec.max_seconds,
             "k_instances": K_INSTANCES,
             "k_realizations": K_REALIZATIONS,
         },

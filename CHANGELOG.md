@@ -4,6 +4,12 @@
 
 ### Changed
 
+- **Add time-based `max_seconds` to task specifications.** ([#28](https://github.com/robocurve/kitchenbench/issues/28))
+  
+  `TaskSpec` now includes a `max_seconds` field representing the real-world completion time budget in seconds (the physical protocol budget, ranging from 60s for simple pick-and-place up to 200s for multi-item sorting). Mock-scale `max_steps` is retained for backwards compatibility.
+
+  Task versions have been bumped (nine tasks bumped to version 3, `scoop_pasta` to version 4) to reflect the metadata change.
+
 - **Scene seeds are now derived from `instance_id` instead of the instance's
   sorted position.** ([#3](https://github.com/robocurve/kitchenbench/issues/3))
 
