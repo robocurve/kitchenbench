@@ -96,3 +96,25 @@ def test_validation_rejects_low_score() -> None:
 def test_validation_rejects_too_few_experts() -> None:
     few = Validation(representativeness=(5,) * (K_EXPERTS - 1), quality=(5,) * (K_EXPERTS - 1))
     assert few.validated is False
+
+
+def test_instances_and_realizations_are_hashable() -> None:
+    from kitchenbench.specs import SPECS
+
+    inst = _instance()
+    # TaskInstance should be hashable
+    assert hash(inst) is not None
+    s_inst = {inst}
+    assert inst in s_inst
+
+    # Realization should be hashable
+    real = inst.realize(0)
+    assert hash(real) is not None
+    s_real = {real}
+    assert real in s_real
+
+    # TaskSpec should also be hashable
+    spec = SPECS[0]
+    assert hash(spec) is not None
+    s_spec = {spec}
+    assert spec in s_spec
