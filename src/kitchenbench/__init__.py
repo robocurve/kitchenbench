@@ -30,6 +30,7 @@ from kitchenbench.instances import (
     Validation,
     Var,
 )
+from kitchenbench.layout import LAYOUT_VERSION, export_scene_layout, load_rig, load_scene_layout
 from kitchenbench.policies import (
     NoopKitchenPolicy,
     RandomKitchenPolicy,
@@ -78,6 +79,7 @@ __all__ = [
     "K_EXPERTS",
     "K_INSTANCES",
     "K_REALIZATIONS",
+    "LAYOUT_VERSION",
     "SIM_CONTRACT_VERSION",
     "SPECS",
     "SPEC_BY_KEY",
@@ -106,8 +108,11 @@ __all__ = [
     "__version__",
     "build_blueprint",
     "build_scenes",
+    "export_scene_layout",
     "fold_cloth",
     "handoff",
+    "load_rig",
+    "load_scene_layout",
     "make_success_checker",
     "make_task",
     "open_container",
