@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://robocurve.github.io/kitchenbench/schemas/scene-layout.schema.json",
+  "title": "KitchenBench scene layout",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "layout_version",
+    "kitchenbench_version",
+    "sim_contract_version",
+    "instance_id",
+    "eval_seed",
+    "epoch",
+    "seed",
+    "instruction",
+    "target_kind",
+    "objects",
+    "conditions",
+    "setup_values"
+  ],
+  "properties": {
+    "layout_version": {"const": 1},
+    "kitchenbench_version": {"type": "string"},
+    "sim_contract_version": {"type": "integer"},
+    "instance_id": {"type": "string"},
+    "eval_seed": {"type": "integer"},
+    "epoch": {"type": "integer"},
+    "seed": {"type": "integer"},
+    "instruction": {"type": "string"},
+    "target_kind": {"type": "string"},
+    "objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "asset", "role", "frame", "xy_cm", "yaw_deg"],
+        "properties": {
+          "name": {"type": "string"},
+          "asset": {"type": "string"},
+          "role": {"type": ["string", "null"]},
+          "frame": {"type": "string"},
+          "xy_cm": {
+            "type": "array",
+            "prefixItems": [{"type": "number"}, {"type": "number"}],
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "yaw_deg": {"type": "number"},
+          "size_cm": {"type": "number"},
+          "amount_g": {"type": "number"}
+        }
+      }
+    },
+    "conditions": {"type": "object"},
+    "setup_values": {"type": "object"}
+  }
+}

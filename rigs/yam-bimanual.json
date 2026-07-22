@@ -1,0 +1,14 @@
+{
+  "layout_version": 1,
+  "rig_id": "yam-bimanual",
+  "frame": {
+    "origin": "midpoint between the two arm bases, projected to table height",
+    "axes": {"+x": "robot right", "+y": "away from the arms"},
+    "units": {"length": "cm", "angle": "deg"}
+  },
+  "arms": {
+    "left": {"base_xy_cm": [-30.0, -20.0], "faces": "+y", "reach_cm": 65},
+    "right": {"base_xy_cm": [30.0, -20.0], "faces": "+y", "reach_cm": 65}
+  },
+  "bench": {"size_cm": [120, 60]}
+}

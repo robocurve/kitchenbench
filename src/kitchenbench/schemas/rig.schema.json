@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://robocurve.github.io/kitchenbench/schemas/rig.schema.json",
+  "title": "KitchenBench bimanual rig",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["layout_version", "rig_id", "arms"],
+  "properties": {
+    "layout_version": {"const": 1},
+    "rig_id": {"type": "string", "minLength": 1},
+    "frame": {"type": "object"},
+    "arms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["left", "right"],
+      "properties": {
+        "left": {"$ref": "#/$defs/arm"},
+        "right": {"$ref": "#/$defs/arm"}
+      }
+    },
+    "bench": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["size_cm"],
+      "properties": {
+        "size_cm": {
+          "type": "array",
+          "prefixItems": [{"type": "number"}, {"type": "number"}],
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    }
+  },
+  "$defs": {
+    "arm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_xy_cm", "faces"],
+      "properties": {
+        "base_xy_cm": {
+          "type": "array",
+          "prefixItems": [{"type": "number"}, {"type": "number"}],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "faces": {"enum": ["+x", "-x", "+y", "-y"]},
+        "reach_cm": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  }
+}
