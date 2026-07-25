@@ -101,20 +101,28 @@ def test_validation_rejects_too_few_experts() -> None:
 def test_instances_and_realizations_are_hashable() -> None:
     from kitchenbench.specs import SPECS
 
-    inst = _instance()
-    # TaskInstance should be hashable
-    assert hash(inst) is not None
-    s_inst = {inst}
-    assert inst in s_inst
+    # TaskInstance: equal objects must hash equal and support dict lookup
+    inst_a = _instance()
+    inst_b = _instance()
+    assert inst_a == inst_b
+    assert hash(inst_a) == hash(inst_b)
+    assert {inst_a: "x"}[inst_b] == "x"
 
-    # Realization should be hashable
-    real = inst.realize(0)
-    assert hash(real) is not None
-    s_real = {real}
-    assert real in s_real
+    # Realization: equal objects must hash equal and support dict lookup
+    real_a = inst_a.realize(0)
+    real_b = inst_b.realize(0)
+    assert real_a == real_b
+    assert hash(real_a) == hash(real_b)
+    assert {real_a: "y"}[real_b] == "y"
 
-    # TaskSpec should also be hashable
-    spec = SPECS[0]
-    assert hash(spec) is not None
-    s_spec = {spec}
-    assert spec in s_spec
+    # TaskSpec: equal objects must hash equal and support dict lookup
+    spec_a = SPECS[0]
+    spec_b = SPECS[0]
+    assert spec_a == spec_b
+    assert hash(spec_a) == hash(spec_b)
+    assert {spec_a: "z"}[spec_b] == "z"
+
+    # Spec-wide invariant: every instance across SPECS must be hashable
+    for spec in SPECS:
+        for instance in spec.instances:
+            assert hash(instance) is not None

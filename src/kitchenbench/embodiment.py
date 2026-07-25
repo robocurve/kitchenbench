@@ -19,6 +19,8 @@ the real arm pairs with a real VLA, not with this mock).
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 from inspect_robots import (
     Action,
@@ -149,7 +151,7 @@ class KitchenEmbodiment:
             instruction=self._instruction,
         )
 
-    def _render(self) -> np.ndarray:
+    def _render(self) -> np.ndarray[Any, Any]:
         img = np.zeros((_IMG, _IMG, 3), dtype=np.uint8)
         filled = round(self._progress * _IMG)
         img[_IMG - filled :, :, 1] = 200  # a green progress bar rising from the bottom
