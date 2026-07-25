@@ -15,7 +15,6 @@ onto Inspect Robots ``Scene``/``Epochs``.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
 import numpy as np
 
@@ -206,7 +205,7 @@ class TaskInstance:
     setup: dict[str, Distribution]
     target_kind: str
     language_vars: tuple[str, ...] = ()
-    static: dict[str, Any] = field(default_factory=dict)
+    static: dict[str, Scalar] = field(default_factory=dict)  # hashable scalars only
     validation: Validation = field(default_factory=Validation)
     sim: SimSpec | None = None
 
