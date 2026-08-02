@@ -4,6 +4,16 @@
 
 ### Changed
 
+- **Replace mock-scale `max_steps` with physical `max_seconds` task horizons.** ([#28](https://github.com/robocurve/kitchenbench/issues/28))
+
+  `TaskSpec` replaces `max_steps: int` with `max_seconds: float` representing the real-world completion time budget in seconds (the physical protocol budget, ranging from 60s for simple pick-and-place up to 200s for multi-item sorting). `make_task()` passes `max_seconds` to `Task`, allowing inspect-robots to dynamically resolve the step budget against the target embodiment's control frequency (`control_hz`).
+
+  **Results from before this change are not comparable to results after it for real-time / physical embodiments.**
+  Previously, tasks evaluated against high-frequency real-world or simulated embodiments were prematurely truncated after only a few seconds.
+
+  Task versions have been bumped (nine tasks bumped to `version="3"`, `scoop_pasta` to `version="4"`) to make this horizon change machine-readable in scene metadata.
+
+
 - **Scene seeds are now derived from `instance_id` instead of the instance's
   sorted position.** ([#3](https://github.com/robocurve/kitchenbench/issues/3))
 
