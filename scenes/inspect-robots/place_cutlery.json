@@ -1,0 +1,110 @@
+{
+  "format": "inspect-robots-setup",
+  "version": 1,
+  "name": "place_cutlery/spoon-on-plate",
+  "instruction": "place the fork on the napkin",
+  "reference": {
+    "left_xy_cm": [
+      -30.0,
+      -20.0
+    ],
+    "right_xy_cm": [
+      30.0,
+      -20.0
+    ]
+  },
+  "objects": [
+    {
+      "label": "fork",
+      "xy_cm": [
+        -10.63,
+        -0.28
+      ]
+    },
+    {
+      "label": "napkin",
+      "xy_cm": [
+        13.34,
+        0
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "instruction": "place the fork on the napkin",
+      "objects": [
+        {
+          "label": "fork",
+          "xy_cm": [
+            -16.79,
+            0.35
+          ]
+        },
+        {
+          "label": "napkin",
+          "xy_cm": [
+            11.5,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "place the spoon on the plate",
+      "objects": [
+        {
+          "label": "spoon",
+          "xy_cm": [
+            -7.44,
+            2.12
+          ]
+        },
+        {
+          "label": "plate",
+          "xy_cm": [
+            17.08,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "place the fork on the plate",
+      "objects": [
+        {
+          "label": "fork",
+          "xy_cm": [
+            -11.83,
+            1.1
+          ]
+        },
+        {
+          "label": "plate",
+          "xy_cm": [
+            7.3,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "place the spoon on the bowl",
+      "objects": [
+        {
+          "label": "spoon",
+          "xy_cm": [
+            -10.39,
+            -0.14
+          ]
+        },
+        {
+          "label": "bowl",
+          "xy_cm": [
+            19.3,
+            0
+          ]
+        }
+      ]
+    }
+  ]
+}

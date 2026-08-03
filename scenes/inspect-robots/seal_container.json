@@ -1,0 +1,75 @@
+{
+  "format": "inspect-robots-setup",
+  "version": 1,
+  "name": "seal_container/food-container",
+  "instruction": "seal the pot with its lid",
+  "reference": {
+    "left_xy_cm": [
+      -30.0,
+      -20.0
+    ],
+    "right_xy_cm": [
+      30.0,
+      -20.0
+    ]
+  },
+  "objects": [
+    {
+      "label": "pot",
+      "xy_cm": [
+        0,
+        0
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "instruction": "seal the food container with its lid",
+      "objects": [
+        {
+          "label": "food_container",
+          "xy_cm": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "seal the food container with its lid",
+      "objects": [
+        {
+          "label": "food_container",
+          "xy_cm": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "seal the pot with its lid",
+      "objects": [
+        {
+          "label": "pot",
+          "xy_cm": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "seal the jar with its lid",
+      "objects": [
+        {
+          "label": "jar",
+          "xy_cm": [
+            0,
+            0
+          ]
+        }
+      ]
+    }
+  ]
+}
