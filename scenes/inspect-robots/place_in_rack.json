@@ -1,7 +1,7 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "place_in_rack/plate",
+  "name": "Place in rack: plate",
   "instruction": "place the plate into the dish rack",
   "reference": {
     "left_xy_cm": [

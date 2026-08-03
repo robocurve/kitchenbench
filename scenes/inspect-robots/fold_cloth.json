@@ -1,7 +1,7 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "fold_cloth/dish-towel",
+  "name": "Fold cloth: dish towel",
   "instruction": "fold the cloth",
   "reference": {
     "left_xy_cm": [

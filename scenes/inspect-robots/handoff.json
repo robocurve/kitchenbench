@@ -1,7 +1,7 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "handoff/utensil",
+  "name": "Handoff: utensil",
   "instruction": "hand off the produce item from one arm to the other",
   "reference": {
     "left_xy_cm": [
