@@ -1,7 +1,7 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "seal_container/food-container",
+  "name": "Seal container: food container",
   "instruction": "seal the pot with its lid",
   "reference": {
     "left_xy_cm": [

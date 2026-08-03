@@ -1,7 +1,7 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "open_container/jar",
+  "name": "Open container: jar",
   "instruction": "open the food container",
   "reference": {
     "left_xy_cm": [

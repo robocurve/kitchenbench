@@ -1,7 +1,7 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "place_cutlery/spoon-on-plate",
+  "name": "Place cutlery: spoon on plate",
   "instruction": "place the fork on the napkin",
   "reference": {
     "left_xy_cm": [

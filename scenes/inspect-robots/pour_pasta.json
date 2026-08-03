@@ -1,7 +1,7 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "pour_pasta/measuring-cup-to-bowl",
+  "name": "Pour pasta: measuring cup to bowl",
   "instruction": "pour the dry pasta into the bowl",
   "reference": {
     "left_xy_cm": [

@@ -1,7 +1,7 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "scoop_pasta/spoon-penne",
+  "name": "Scoop pasta: spoon penne",
   "instruction": "scoop about 118 g of the rigatoni with the spoon and transfer it to the container",
   "reference": {
     "left_xy_cm": [
