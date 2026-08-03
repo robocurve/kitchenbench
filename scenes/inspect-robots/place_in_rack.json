@@ -1,0 +1,115 @@
+{
+  "format": "inspect-robots-setup",
+  "version": 1,
+  "name": "place_in_rack/plate",
+  "instruction": "place the plate into the dish rack",
+  "reference": {
+    "left_xy_cm": [
+      -30.0,
+      -20.0
+    ],
+    "right_xy_cm": [
+      30.0,
+      -20.0
+    ]
+  },
+  "objects": [
+    {
+      "label": "plate",
+      "xy_cm": [
+        -10,
+        0
+      ],
+      "yaw_deg": 57.55
+    },
+    {
+      "label": "dish_rack",
+      "xy_cm": [
+        13.1,
+        0
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "instruction": "place the plate into the dish rack",
+      "objects": [
+        {
+          "label": "plate",
+          "xy_cm": [
+            -10,
+            0
+          ],
+          "yaw_deg": 50.5
+        },
+        {
+          "label": "dish_rack",
+          "xy_cm": [
+            11.57,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "place the bowl into the dish rack",
+      "objects": [
+        {
+          "label": "bowl",
+          "xy_cm": [
+            -10,
+            0
+          ],
+          "yaw_deg": 83.66
+        },
+        {
+          "label": "dish_rack",
+          "xy_cm": [
+            11.74,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "place the bowl into the dish rack",
+      "objects": [
+        {
+          "label": "bowl",
+          "xy_cm": [
+            -10,
+            0
+          ],
+          "yaw_deg": 30.09
+        },
+        {
+          "label": "dish_rack",
+          "xy_cm": [
+            11.13,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "place the cup into the dish rack",
+      "objects": [
+        {
+          "label": "cup",
+          "xy_cm": [
+            -10,
+            0
+          ],
+          "yaw_deg": 70.45
+        },
+        {
+          "label": "dish_rack",
+          "xy_cm": [
+            11.64,
+            0
+          ]
+        }
+      ]
+    }
+  ]
+}

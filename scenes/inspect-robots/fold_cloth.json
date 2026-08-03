@@ -1,0 +1,80 @@
+{
+  "format": "inspect-robots-setup",
+  "version": 1,
+  "name": "fold_cloth/dish-towel",
+  "instruction": "fold the cloth",
+  "reference": {
+    "left_xy_cm": [
+      -30.0,
+      -20.0
+    ],
+    "right_xy_cm": [
+      30.0,
+      -20.0
+    ]
+  },
+  "objects": [
+    {
+      "label": "cloth",
+      "xy_cm": [
+        0,
+        0
+      ],
+      "yaw_deg": 13.27
+    }
+  ],
+  "variants": [
+    {
+      "instruction": "fold the dish towel",
+      "objects": [
+        {
+          "label": "dish_towel",
+          "xy_cm": [
+            0,
+            0
+          ],
+          "yaw_deg": 88.56
+        }
+      ]
+    },
+    {
+      "instruction": "fold the dish towel",
+      "objects": [
+        {
+          "label": "dish_towel",
+          "xy_cm": [
+            0,
+            0
+          ],
+          "yaw_deg": 8.11
+        }
+      ]
+    },
+    {
+      "instruction": "fold the cloth",
+      "objects": [
+        {
+          "label": "cloth",
+          "xy_cm": [
+            0,
+            0
+          ],
+          "yaw_deg": 77.91
+        }
+      ]
+    },
+    {
+      "instruction": "fold the cloth",
+      "objects": [
+        {
+          "label": "cloth",
+          "xy_cm": [
+            0,
+            0
+          ],
+          "yaw_deg": 42.26
+        }
+      ]
+    }
+  ]
+}

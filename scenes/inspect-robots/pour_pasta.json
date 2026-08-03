@@ -1,0 +1,110 @@
+{
+  "format": "inspect-robots-setup",
+  "version": 1,
+  "name": "pour_pasta/measuring-cup-to-bowl",
+  "instruction": "pour the dry pasta into the bowl",
+  "reference": {
+    "left_xy_cm": [
+      -30.0,
+      -20.0
+    ],
+    "right_xy_cm": [
+      30.0,
+      -20.0
+    ]
+  },
+  "objects": [
+    {
+      "label": "bowl",
+      "xy_cm": [
+        3.47,
+        -1.45
+      ]
+    },
+    {
+      "label": "measuring_cup",
+      "xy_cm": [
+        -12,
+        0
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "instruction": "pour the dry pasta into the bowl",
+      "objects": [
+        {
+          "label": "bowl",
+          "xy_cm": [
+            3.96,
+            4.58
+          ]
+        },
+        {
+          "label": "measuring_cup",
+          "xy_cm": [
+            -12,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "pour the dry pasta into the bowl",
+      "objects": [
+        {
+          "label": "bowl",
+          "xy_cm": [
+            0.31,
+            2.04
+          ]
+        },
+        {
+          "label": "measuring_cup",
+          "xy_cm": [
+            -12,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "pour the dry pasta into the bowl",
+      "objects": [
+        {
+          "label": "bowl",
+          "xy_cm": [
+            -2.7,
+            -1.78
+          ]
+        },
+        {
+          "label": "measuring_cup",
+          "xy_cm": [
+            -12,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "pour the dry pasta into the pot",
+      "objects": [
+        {
+          "label": "pot",
+          "xy_cm": [
+            3.04,
+            1.4
+          ]
+        },
+        {
+          "label": "measuring_cup",
+          "xy_cm": [
+            -12,
+            0
+          ]
+        }
+      ]
+    }
+  ]
+}

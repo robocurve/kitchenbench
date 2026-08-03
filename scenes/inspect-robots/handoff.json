@@ -1,0 +1,80 @@
+{
+  "format": "inspect-robots-setup",
+  "version": 1,
+  "name": "handoff/utensil",
+  "instruction": "hand off the produce item from one arm to the other",
+  "reference": {
+    "left_xy_cm": [
+      -30.0,
+      -20.0
+    ],
+    "right_xy_cm": [
+      30.0,
+      -20.0
+    ]
+  },
+  "objects": [
+    {
+      "label": "produce_item",
+      "xy_cm": [
+        -23.91,
+        0
+      ],
+      "yaw_deg": 31.72
+    }
+  ],
+  "variants": [
+    {
+      "instruction": "hand off the cup from one arm to the other",
+      "objects": [
+        {
+          "label": "cup",
+          "xy_cm": [
+            -17.05,
+            0
+          ],
+          "yaw_deg": 0.09
+        }
+      ]
+    },
+    {
+      "instruction": "hand off the cup from one arm to the other",
+      "objects": [
+        {
+          "label": "cup",
+          "xy_cm": [
+            -20.31,
+            0
+          ],
+          "yaw_deg": 43.77
+        }
+      ]
+    },
+    {
+      "instruction": "hand off the produce item from one arm to the other",
+      "objects": [
+        {
+          "label": "produce_item",
+          "xy_cm": [
+            -11.06,
+            0
+          ],
+          "yaw_deg": 82.69
+        }
+      ]
+    },
+    {
+      "instruction": "hand off the cup from one arm to the other",
+      "objects": [
+        {
+          "label": "cup",
+          "xy_cm": [
+            -14.37,
+            0
+          ],
+          "yaw_deg": 78.88
+        }
+      ]
+    }
+  ]
+}

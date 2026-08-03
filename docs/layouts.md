@@ -71,6 +71,14 @@ and right-at-positive-x convention.
 The packaged schemas are `schemas/scene-layout.schema.json` and
 `schemas/rig.schema.json` within the `kitchenbench` installation.
 
+## Inspect Robots setup scenes
+
+`scenes/inspect-robots/` holds one `inspect-robots-setup` scene per task —
+the first instance's five realizations (epoch 0 plus four `variants`)
+projected through the `yam-bimanual` rig for the Inspect Robots phone apps.
+They demonstrate that layouts are portable to operator tooling and are
+regenerable; see the README in that directory for the exact recipe.
+
 ## Command line usage
 
 Write canonical JSON to standard output:

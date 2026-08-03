@@ -1,0 +1,145 @@
+{
+  "format": "inspect-robots-setup",
+  "version": 1,
+  "name": "scoop_pasta/spoon-penne",
+  "instruction": "scoop about 118 g of the rigatoni with the spoon and transfer it to the container",
+  "reference": {
+    "left_xy_cm": [
+      -30.0,
+      -20.0
+    ],
+    "right_xy_cm": [
+      30.0,
+      -20.0
+    ]
+  },
+  "objects": [
+    {
+      "label": "container",
+      "xy_cm": [
+        17.5,
+        0
+      ]
+    },
+    {
+      "label": "rigatoni",
+      "xy_cm": [
+        -6.76,
+        0
+      ]
+    },
+    {
+      "label": "spoon",
+      "xy_cm": [
+        -20,
+        10
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "instruction": "scoop about 54 g of the rigatoni with the measuring cup and transfer it to the container",
+      "objects": [
+        {
+          "label": "container",
+          "xy_cm": [
+            10.82,
+            0
+          ]
+        },
+        {
+          "label": "rigatoni",
+          "xy_cm": [
+            -7.31,
+            0
+          ]
+        },
+        {
+          "label": "measuring_cup",
+          "xy_cm": [
+            -20,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "scoop about 88 g of the rigatoni with the measuring cup and transfer it to the container",
+      "objects": [
+        {
+          "label": "container",
+          "xy_cm": [
+            16.68,
+            0
+          ]
+        },
+        {
+          "label": "rigatoni",
+          "xy_cm": [
+            -11.44,
+            0
+          ]
+        },
+        {
+          "label": "measuring_cup",
+          "xy_cm": [
+            -20,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "scoop about 55 g of the rigatoni with the spoon and transfer it to the container",
+      "objects": [
+        {
+          "label": "container",
+          "xy_cm": [
+            10.53,
+            0
+          ]
+        },
+        {
+          "label": "rigatoni",
+          "xy_cm": [
+            -7.66,
+            0
+          ]
+        },
+        {
+          "label": "spoon",
+          "xy_cm": [
+            -20,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "instruction": "scoop about 70 g of the penne with the measuring cup and transfer it to the container",
+      "objects": [
+        {
+          "label": "container",
+          "xy_cm": [
+            15.21,
+            0
+          ]
+        },
+        {
+          "label": "penne",
+          "xy_cm": [
+            -7.97,
+            0
+          ]
+        },
+        {
+          "label": "measuring_cup",
+          "xy_cm": [
+            -20,
+            10
+          ]
+        }
+      ]
+    }
+  ]
+}
