@@ -1,7 +1,7 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "Stack: cups",
+  "name": "Stack: cups · KitchenBench",
   "instruction": "stack the cups",
   "reference": {
     "left_xy_cm": [

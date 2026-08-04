@@ -1,7 +1,7 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "Sort cutlery: balanced pile",
+  "name": "Sort cutlery: balanced pile · KitchenBench",
   "instruction": "sort the cutlery into the correct tray compartments",
   "reference": {
     "left_xy_cm": [

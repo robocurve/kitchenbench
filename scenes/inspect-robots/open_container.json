@@ -1,7 +1,7 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "Open container: jar",
+  "name": "Open container: jar · KitchenBench",
   "instruction": "open the food container",
   "reference": {
     "left_xy_cm": [
