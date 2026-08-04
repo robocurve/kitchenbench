@@ -27,7 +27,8 @@ for id in place_cutlery/spoon-on-plate stack/cups place_in_rack/plate \
                | {label:.asset, xy_cm:(.xy_cm|map(.*100|round/100))}
                + (if .yaw_deg != 0 then {yaw_deg:(.yaw_deg*100|round/100)} else {} end)];
     def friendly: split("/")
-      | ((.[0]|gsub("_";" ")|(.[0:1]|ascii_upcase)+.[1:]) + ": " + (.[1]|gsub("-";" ")));
+      | ((.[0]|gsub("_";" ")|(.[0:1]|ascii_upcase)+.[1:]) + ": " + (.[1]|gsub("-";" ")))
+      + " · KitchenBench";
     {format:"inspect-robots-setup", version:1, name:(.[0].instance_id|friendly),
      instruction:.[0].instruction,
      reference:{left_xy_cm:$rig[0].arms.left.base_xy_cm,
