@@ -1,18 +1,24 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "Place in rack: plate · KitchenBench",
+  "name": "Place in rack: plate \u00b7 KitchenBench",
   "instruction": "place the plate into the dish rack",
-  "reference": {
-    "left_xy_cm": [
-      -30.0,
-      -20.0
-    ],
-    "right_xy_cm": [
-      30.0,
-      -20.0
-    ]
-  },
+  "references": [
+    {
+      "label": "LEFT arm",
+      "xy_cm": [
+        -30.0,
+        -20.0
+      ]
+    },
+    {
+      "label": "RIGHT arm",
+      "xy_cm": [
+        30.0,
+        -20.0
+      ]
+    }
+  ],
   "objects": [
     {
       "label": "plate",

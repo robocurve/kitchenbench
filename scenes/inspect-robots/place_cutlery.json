@@ -1,18 +1,24 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "Place cutlery: spoon on plate · KitchenBench",
+  "name": "Place cutlery: spoon on plate \u00b7 KitchenBench",
   "instruction": "place the fork on the napkin",
-  "reference": {
-    "left_xy_cm": [
-      -30.0,
-      -20.0
-    ],
-    "right_xy_cm": [
-      30.0,
-      -20.0
-    ]
-  },
+  "references": [
+    {
+      "label": "LEFT arm",
+      "xy_cm": [
+        -30.0,
+        -20.0
+      ]
+    },
+    {
+      "label": "RIGHT arm",
+      "xy_cm": [
+        30.0,
+        -20.0
+      ]
+    }
+  ],
   "objects": [
     {
       "label": "fork",

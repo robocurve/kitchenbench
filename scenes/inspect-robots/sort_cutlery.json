@@ -1,18 +1,24 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "Sort cutlery: balanced pile · KitchenBench",
+  "name": "Sort cutlery: balanced pile \u00b7 KitchenBench",
   "instruction": "sort the cutlery into the correct tray compartments",
-  "reference": {
-    "left_xy_cm": [
-      -30.0,
-      -20.0
-    ],
-    "right_xy_cm": [
-      30.0,
-      -20.0
-    ]
-  },
+  "references": [
+    {
+      "label": "LEFT arm",
+      "xy_cm": [
+        -30.0,
+        -20.0
+      ]
+    },
+    {
+      "label": "RIGHT arm",
+      "xy_cm": [
+        30.0,
+        -20.0
+      ]
+    }
+  ],
   "objects": [
     {
       "label": "tray",

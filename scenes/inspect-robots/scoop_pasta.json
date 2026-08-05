@@ -1,18 +1,24 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "Scoop pasta: spoon penne · KitchenBench",
+  "name": "Scoop pasta: spoon penne \u00b7 KitchenBench",
   "instruction": "scoop about 118 g of the rigatoni with the spoon and transfer it to the container",
-  "reference": {
-    "left_xy_cm": [
-      -30.0,
-      -20.0
-    ],
-    "right_xy_cm": [
-      30.0,
-      -20.0
-    ]
-  },
+  "references": [
+    {
+      "label": "LEFT arm",
+      "xy_cm": [
+        -30.0,
+        -20.0
+      ]
+    },
+    {
+      "label": "RIGHT arm",
+      "xy_cm": [
+        30.0,
+        -20.0
+      ]
+    }
+  ],
   "objects": [
     {
       "label": "container",
