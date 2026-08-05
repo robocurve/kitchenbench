@@ -1,18 +1,24 @@
 {
   "format": "inspect-robots-setup",
   "version": 1,
-  "name": "Open container: jar · KitchenBench",
+  "name": "Open container: jar \u00b7 KitchenBench",
   "instruction": "open the food container",
-  "reference": {
-    "left_xy_cm": [
-      -30.0,
-      -20.0
-    ],
-    "right_xy_cm": [
-      30.0,
-      -20.0
-    ]
-  },
+  "references": [
+    {
+      "label": "LEFT arm",
+      "xy_cm": [
+        -30.0,
+        -20.0
+      ]
+    },
+    {
+      "label": "RIGHT arm",
+      "xy_cm": [
+        30.0,
+        -20.0
+      ]
+    }
+  ],
   "objects": [
     {
       "label": "food_container",

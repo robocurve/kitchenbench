@@ -5,6 +5,13 @@ Robots phone apps (iOS/Android): the app overlays a grid on the physical
 bench, the operator taps the two arm-base positions, and the scene's objects
 appear as labeled markers at their sampled poses.
 
+The app's format stores anchors as an ordered `references` list of labeled
+points; for these scenes the two anchors are the rig's arm bases, so they
+carry the labels "LEFT arm" and "RIGHT arm" in the JSON itself. The apps
+hardcode no arm wording; the placement prompts ("Tap the LEFT arm base")
+come from these labels. Scenes in the older single `reference` object shape
+still load, prompting by numbered position instead.
+
 Each file is the task's **first instance** projected through the
 `yam-bimanual` rig: epoch 0 is the default realization and epochs 1–4 are the
 `variants` the app's **Resample** button draws from — so all five realizations
@@ -31,8 +38,8 @@ for id in place_cutlery/spoon-on-plate stack/cups place_in_rack/plate \
       + " · KitchenBench";
     {format:"inspect-robots-setup", version:1, name:(.[0].instance_id|friendly),
      instruction:.[0].instruction,
-     reference:{left_xy_cm:$rig[0].arms.left.base_xy_cm,
-                right_xy_cm:$rig[0].arms.right.base_xy_cm},
+     references:[{label:"LEFT arm", xy_cm:$rig[0].arms.left.base_xy_cm},
+                 {label:"RIGHT arm", xy_cm:$rig[0].arms.right.base_xy_cm}],
      objects:(.[0]|objs),
      variants:[.[1:][] | {instruction:.instruction, objects:objs}]}' \
     > "scenes/inspect-robots/${id%%/*}.json"
